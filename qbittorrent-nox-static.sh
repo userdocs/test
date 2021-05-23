@@ -144,6 +144,8 @@ set_default_values() {
 	#
 	qbt_install_dir="${qbt_working_dir}/qbt-build"      # install relative to the script location.
 	qbt_install_dir_short="${qbt_install_dir/$HOME/\~}" # Used with echos. Use the qbt_install_dir variable but the $HOME path is replaced with a literal ~
+	#
+	qbt_local_paths="$PATH" # get the local users $PATH before we isolate the script by setting HOME to the install dir in the set_build_directory function.
 }
 #######################################################################################################################################################
 # This function will check for a list of defined dependencies from the qbt_required_pkgs array. Apps like python3-dev are dynamically set
@@ -390,14 +392,13 @@ set_build_directory() {
 		fi
 	fi
 	#
-	HOME=${qbt_install_dir}
-	#
 	## Set lib and include directory paths based on install path.
 	include_dir="${qbt_install_dir}/include"
 	lib_dir="${qbt_install_dir}/lib"
 	#
 	## Define some build specific variables
-	PATH="${qbt_install_dir}/bin:${HOME}/bin${PATH:+:${PATH}}"
+	HOME="${qbt_install_dir}"
+	PATH="${qbt_install_dir}/bin${PATH:+:${qbt_local_paths}}"
 	LD_LIBRARY_PATH="-L${lib_dir}"
 	PKG_CONFIG_PATH="${lib_dir}/pkgconfig"
 }
