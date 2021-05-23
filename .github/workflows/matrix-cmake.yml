@@ -80,6 +80,7 @@ jobs:
             preview_release: true
     name: "${{ matrix.name }}"
     env:
+      build_dir: "qbt-build"
       qbt_build_tool: "cmake"
       qbt_cross_name: "${{ matrix.arch_type }}"
       qbt_cross_host: "${{ matrix.cross_host }}"
@@ -92,9 +93,9 @@ jobs:
       - name: Bootstrap
         run: bash qbittorrent-nox-static.sh "${{ matrix.libtorrent_v2 }}" -bs-a
       - name: Bootstrap release tag
-        run: echo "release_tag=$(cat qbt-build/release_info/tag.md)" >> $GITHUB_ENV
+        run: echo "release_tag=$(cat ${{ matrix.build_dir }}/release_info/tag.md)" >> $GITHUB_ENV
       - name: Bootstrap release title
-        run: echo "release_title=$(cat qbt-build/release_info/title.md)" >> $GITHUB_ENV
+        run: echo "release_title=$(cat ${{ matrix.build_dir }}/release_info/title.md)" >> $GITHUB_ENV
         #
       - name: libexecinfo
         run: bash qbittorrent-nox-static.sh libexecinfo
@@ -118,23 +119,23 @@ jobs:
         run: bash qbittorrent-nox-static.sh "${{ matrix.libtorrent_v2 }}" qbittorrent
       #
       - name: "Set release asset name"
-        run: mv -f "qbt-build/completed/qbittorrent-nox" "qbt-build/completed/qbittorrent-nox-${{ matrix.artifact_name }}"
+        run: mv -f "${{ matrix.build_dir }}/completed/qbittorrent-nox" "${{ matrix.build_dir }}/completed/qbittorrent-nox-${{ matrix.artifact_name }}"
       - name: "Set artifact asset name"
-        run: mv -f "qbt-build/completed/qbittorrent_graph.png" "qbt-build/completed/qbittorrent_${{ matrix.artifact_name }}_graph.png"
+        run: mv -f "${{ matrix.build_dir }}/completed/qbittorrent_graph.png" "${{ matrix.build_dir }}/completed/qbittorrent_${{ matrix.artifact_name }}_graph.png"
       #
       - name: "Create release - tag - assets"
         uses: ncipollo/release-action@v1
         with:
           prerelease: ${{ matrix.preview_release }}
-          artifacts: "qbt-build/completed/qbittorrent-nox-${{ matrix.artifact_name }}"
+          artifacts: "${{ matrix.build_dir }}/completed/qbittorrent-nox-${{ matrix.artifact_name }}"
           replacesArtifacts: true
           tag: "${{ env.release_tag }}"
           name: "${{ env.release_title }}"
-          bodyFile: "qbt-build/release_info/release.md"
+          bodyFile: "${{ matrix.build_dir }}/release_info/release.md"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         with:
           name: qbittorrent_${{ matrix.artifact_name }}_graph.png
-          path: qb-build/completed/qbittorrent_${{ matrix.artifact_name }}_graph.png
+          path: ${{ matrix.build_dir }}/completed/qbittorrent_${{ matrix.artifact_name }}_graph.png
