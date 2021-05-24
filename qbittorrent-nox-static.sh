@@ -1658,7 +1658,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			-D CMAKE_BUILD_TYPE="release" \
 			-D QT_FEATURE_optimize_full=on -D QT_FEATURE_static=on -D QT_FEATURE_shared=off \
 			-D QT_FEATURE_gui=off -D QT_FEATURE_openssl_linked=on \
-			-D QT_FEATURE_dbus=off -D QT_FEATURE_pcre2=on -D QT_FEATURE_widgets=off -D QT_FEATURE_sql=off \
+			-D QT_FEATURE_dbus=off -D QT_FEATURE_pcre2=on -D QT_FEATURE_widgets=off \
 			-D QT_FEATURE_testlib=off -D QT_BUILD_EXAMPLES=off -D QT_BUILD_TESTS=off \
 			-D CMAKE_CXX_STANDARD="${standard}" \
 			-D CMAKE_PREFIX_PATH="${qbt_install_dir}" \
