@@ -1588,14 +1588,14 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
 			cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${libtorrent_github_tag}/dep_graph.dot" -G Ninja -B build \
 				"${multi_libtorrent[@]}" \
-				-D CMAKE_BUILD_TYPE="release" \
+				-D CMAKE_BUILD_TYPE="Release" \
 				-D CMAKE_CXX_STANDARD="${standard}" \
 				-D CMAKE_PREFIX_PATH="${qbt_install_dir};${qbt_install_dir}/boost" \
 				-D CMAKE_CXX_FLAGS="${CXXFLAGS}" \
 				-D BUILD_SHARED_LIBS=OFF \
 				-D Iconv_LIBRARY="${lib_dir}/libiconv.a" \
 				-D CMAKE_INSTALL_PREFIX="${qbt_install_dir}" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
-			cmake --build build --parallel "$(nproc)" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
+			cmake --build build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 			#
 			post_command build
 			#
@@ -1611,15 +1611,16 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			libtorrent_strings_version="$(strings -d "${lib_dir}/libtorrent-rasterbar.a" | grep -Eo "^libtorrent/[0-9]\.(.*)")" # ${libtorrent_strings_version#*/}
 			#
 			if [[ "${libtorrent_github_tag}" =~ ^(RC_2|v2) ]]; then
-				libtorrent_libs="-l:libtorrent-rasterbar.a -l:libtry_signal.a"
+				libtorrent_libs="-l:libiconv.a -l:libboost_system.a -l:libtorrent-rasterbar.a -l:libtry_signal.a"
+				lt_cmake_flags="-DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_NO_DEPRECATED -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO -DTORRENT_SSL_PEERS -DOPENSSL_NO_SSL2"
 			else
-				libtorrent_libs="-l:libtorrent-rasterbar.a"
+				libtorrent_libs="-l:libiconv.a -l:libboost_system.a -l:libtorrent-rasterbar.a"
+				lt_cmake_flags="-DBOOST_ASIO_ENABLE_CANCELIO -DTORRENT_USE_ICONV -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO"
 			fi
 			#
 			cat > "${PKG_CONFIG_PATH}/libtorrent-rasterbar.pc" <<- LIBTORRENT_PKG_CONFIG
 				prefix=${qbt_install_dir}
-				exec_prefix=\${prefix}
-				libdir=\${exec_prefix}/lib
+				libdir=\${prefix}/lib
 				includedir=\${prefix}/include
 
 				Name: libtorrent-rasterbar
@@ -1628,7 +1629,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 
 				Requires:
 				Libs: -L\${libdir} ${libtorrent_libs}
-				Cflags: -I\${includedir} -I${BOOST_ROOT}
+				Cflags: -I\${includedir} -I${BOOST_ROOT} ${lt_cmake_flags}
 			LIBTORRENT_PKG_CONFIG
 		fi
 		#
@@ -1666,7 +1667,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			-D CMAKE_CXX_STANDARD_LIBRARIES="${lib_dir}/libexecinfo.a" \
 			-D CMAKE_SKIP_RPATH=on -D CMAKE_SKIP_INSTALL_RPATH=on \
 			-D CMAKE_INSTALL_PREFIX="${qbt_install_dir}" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
-		cmake --build build --parallel "$(nproc)" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
+		cmake --build build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 		#
 		post_command build
 		#
@@ -1725,7 +1726,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			-D CMAKE_CXX_STANDARD_LIBRARIES="${lib_dir}/libexecinfo.a" \
 			-D CMAKE_SKIP_RPATH=on -D CMAKE_SKIP_INSTALL_RPATH=on \
 			-D CMAKE_INSTALL_PREFIX="${qbt_install_dir}" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
-		cmake --build build --parallel "$(nproc)" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
+		cmake --build build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 		#
 		post_command build
 		#
@@ -1783,7 +1784,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 				-D CMAKE_CXX_STANDARD_LIBRARIES="${libexecinfo}" \
 				-D GUI=OFF \
 				-D CMAKE_INSTALL_PREFIX="${qbt_install_dir}" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
-			cmake --build build --parallel "$(nproc)" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
+			cmake --build build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 			#
 			post_command build
 			#
