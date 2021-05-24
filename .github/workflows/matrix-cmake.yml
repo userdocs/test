@@ -30,6 +30,7 @@ jobs:
             artifact_name: ${{ env.arch_type }}_${{ env.default_lt_v1 }}
             icu_step_name: icu skipped
             preview_release: false
+
           - name: x86_64_${{ env.default_qbt_v }}_${{ env.default_lt_v2 }}
             arch_type: x86_64
             release_name: ${{ env.arch_type }}
@@ -37,6 +38,7 @@ jobs:
             icu_step_name: icu skipped
             libtorrent_v2: -lt ${{ env.default_lt_v2 }}
             preview_release: true
+
           - name: icu-x86_64_${{ env.default_qbt_v }}_${{ env.default_lt_v1 }}
             arch_type: x86_64
             release_name: icu-${{ env.arch_type }}
@@ -45,6 +47,7 @@ jobs:
             with_icu: bash qbittorrent-nox-static.sh icu
             qt_with_icu: -i
             preview_release: false
+
           - name: icu-x86_64_${{ env.default_qbt_v }}_${{ env.default_lt_v2 }}
             arch_type: x86_64
             release_name: icu-${{ env.arch_type }}
@@ -64,6 +67,7 @@ jobs:
             cross_qt_xplatform: linux-aarch64-gnu-g++
             icu_step_name: icu skipped
             preview_release: false
+
           - name: aarch64${{ env.default_qbt_v }}_${{ env.default_lt_v2 }}
             arch_type: aarch64
             release_name: ${{ env.arch_type }}
@@ -74,6 +78,7 @@ jobs:
             icu_step_name: icu skipped
             libtorrent_v2: -lt ${{ env.default_lt_v2 }}
             preview_release: true
+
           - name: icu-aarch64${{ env.default_qbt_v }}_${{ env.default_lt_v1 }}
             arch_type: aarch64
             release_name: icu-${{ env.arch_type }}
@@ -85,6 +90,7 @@ jobs:
             with_icu: bash qbittorrent-nox-static.sh icu
             qt_with_icu: -i
             preview_release: false
+
           - name: icu-aarch64${{ env.default_qbt_v }}_${{ env.default_lt_v2 }}
             arch_type: aarch64
             release_name: icu-${{ env.arch_type }}
