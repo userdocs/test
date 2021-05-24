@@ -11,9 +11,6 @@ jobs:
         shell: bash
     container: alpine:latest
     env:
-      default_lt_v1: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v1/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
-      default_lt_v2: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v2/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
-      default_qbt_v: $(git ls-remote -q -t --refs https://github.com/qbittorrent/qBittorrent.git | awk '{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)
       build_dir: "qbt-build"
       qbt_build_tool: "cmake"
       qbt_cross_name: "${{ matrix.arch_type }}"
@@ -24,65 +21,72 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: x86_64_${{ env.default_qbt_v }}_${{ env.default_lt_v1 }}
+          - name: x86_64_v1_2
             arch_type: x86_64
-            release_name: ${{ env.arch_type }}
-            artifact_name: ${{ env.arch_type }}_${{ env.default_lt_v1 }}
+            libtorrent_version: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v1/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
+            release_name: ${{ matrix.arch_type }}
+            artifact_name: ${{ matrix.arch_type }}_${{ matrix.libtorrent_version }}
             icu_step_name: icu skipped
             preview_release: false
 
-          - name: x86_64_${{ env.default_qbt_v }}_${{ env.default_lt_v2 }}
+          - name: x86_64_v2_0
             arch_type: x86_64
-            release_name: ${{ env.arch_type }}
-            artifact_name: ${{ env.arch_type }}_${{ env.default_lt_v2 }}
+            libtorrent_version: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v2/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
+            release_name: ${{ matrix.arch_type }}
+            artifact_name: ${{ matrix.arch_type }}_${{ matrix.libtorrent_version }}
             icu_step_name: icu skipped
-            libtorrent_v2: -lt ${{ env.default_lt_v2 }}
+            libtorrent_v2: -lt ${{ matrix.libtorrent_version }}
             preview_release: true
 
-          - name: icu-x86_64_${{ env.default_qbt_v }}_${{ env.default_lt_v1 }}
+          - name: icu_x86_64_v1_2
             arch_type: x86_64
-            release_name: icu-${{ env.arch_type }}
-            artifact_name: icu-${{ env.arch_type }}_${{ env.default_lt_v1 }}
+            libtorrent_version: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v1/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
+            release_name: ${{ matrix.arch_type }}
+            artifact_name: ${{ matrix.arch_type }}_${{ matrix.libtorrent_version }}
             icu_step_name: icu
             with_icu: bash qbittorrent-nox-static.sh icu
             qt_with_icu: -i
             preview_release: false
 
-          - name: icu-x86_64_${{ env.default_qbt_v }}_${{ env.default_lt_v2 }}
+          - name: icu_x86_64_v2_0
             arch_type: x86_64
-            release_name: icu-${{ env.arch_type }}
-            artifact_name: icu-${{ env.arch_type }}_${{ env.default_lt_v2 }}
+            libtorrent_version: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v2/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
+            release_name: ${{ matrix.arch_type }}
+            artifact_name: ${{ matrix.arch_type }}_${{ matrix.libtorrent_version }}
             icu_step_name: icu
             with_icu: bash qbittorrent-nox-static.sh icu
             qt_with_icu: -i
-            libtorrent_v2: -lt ${{ env.default_lt_v2 }}
+            libtorrent_v2: -lt ${{ matrix.libtorrent_version }}
             preview_release: true
 
-          - name: aarch64_${{ env.default_qbt_v }}_${{ env.default_lt_v1 }}
+          - name: aarch64_v1_2
             arch_type: aarch64
-            release_name: ${{ env.arch_type }}
-            artifact_name: i${{ env.arch_type }}_${{ env.default_lt_v1 }}
+            libtorrent_version: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v1/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
+            release_name: ${{ matrix.arch_type }}
+            artifact_name: ${{ matrix.arch_type }}_${{ matrix.libtorrent_version }}
             cross_host: aarch64-linux-musl
             cross_openssl: linux-aarch64
             cross_qt_xplatform: linux-aarch64-gnu-g++
             icu_step_name: icu skipped
             preview_release: false
 
-          - name: aarch64${{ env.default_qbt_v }}_${{ env.default_lt_v2 }}
+          - name: aarch64_v2_0
             arch_type: aarch64
-            release_name: ${{ env.arch_type }}
-            artifact_name: i${{ env.arch_type }}_${{ env.default_lt_v2 }}
+            libtorrent_version: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v2/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
+            release_name: ${{ matrix.arch_type }}
+            artifact_name: ${{ matrix.arch_type }}_${{ matrix.libtorrent_version }}
             cross_host: aarch64-linux-musl
             cross_openssl: linux-aarch64
             cross_qt_xplatform: linux-aarch64-gnu-g++
             icu_step_name: icu skipped
-            libtorrent_v2: -lt ${{ env.default_lt_v2 }}
+            libtorrent_v2: -lt ${{ matrix.libtorrent_version }}
             preview_release: true
 
-          - name: icu-aarch64${{ env.default_qbt_v }}_${{ env.default_lt_v1 }}
+          - name: icu_aarch64_v1_2
             arch_type: aarch64
-            release_name: icu-${{ env.arch_type }}
-            artifact_name: icu-${{ env.arch_type }}_${{ env.default_lt_v1 }}
+            libtorrent_version: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v1/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
+            release_name: ${{ matrix.arch_type }}
+            artifact_name: ${{ matrix.arch_type }}_${{ matrix.libtorrent_version }}
             cross_host: aarch64-linux-musl
             cross_openssl: linux-aarch64
             cross_qt_xplatform: linux-aarch64-gnu-g++
@@ -91,17 +95,18 @@ jobs:
             qt_with_icu: -i
             preview_release: false
 
-          - name: icu-aarch64${{ env.default_qbt_v }}_${{ env.default_lt_v2 }}
+          - name: icu_aarch64_v2_0
             arch_type: aarch64
-            release_name: icu-${{ env.arch_type }}
-            artifact_name: icu-${{ env.arch_type }}_${{ env.default_lt_v2 }}
+            libtorrent_version: $(git ls-remote -t --sort=-v:refname --refs https://github.com/arvidn/libtorrent.git | awk '/v2/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)
+            release_name: ${{ matrix.arch_type }}
+            artifact_name: ${{ matrix.arch_type }}_${{ matrix.libtorrent_version }}
             cross_host: aarch64-linux-musl
             cross_openssl: linux-aarch64
             cross_qt_xplatform: linux-aarch64-gnu-g++
             icu_step_name: icu
             with_icu: bash qbittorrent-nox-static.sh icu
             qt_with_icu: -i
-            libtorrent_v2: -lt ${{ env.default_lt_v2 }}
+            libtorrent_v2: -lt ${{ matrix.libtorrent_version }}
             preview_release: true
     name: "${{ matrix.name }}"
     steps:
