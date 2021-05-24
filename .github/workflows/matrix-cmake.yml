@@ -93,9 +93,9 @@ jobs:
       - name: Bootstrap
         run: bash qbittorrent-nox-static.sh "${{ matrix.libtorrent_v2 }}" -bs-a
       - name: Bootstrap release tag
-        run: echo "release_tag=$(cat ${{ matrix.build_dir }}/release_info/tag.md)" >> $GITHUB_ENV
+        run: echo "release_tag=$(cat ${{ env.build_dir }}/release_info/tag.md)" >> $GITHUB_ENV
       - name: Bootstrap release title
-        run: echo "release_title=$(cat ${{ matrix.build_dir }}/release_info/title.md)" >> $GITHUB_ENV
+        run: echo "release_title=$(cat ${{ env.build_dir }}/release_info/title.md)" >> $GITHUB_ENV
         #
       - name: libexecinfo
         run: bash qbittorrent-nox-static.sh libexecinfo
@@ -119,23 +119,23 @@ jobs:
         run: bash qbittorrent-nox-static.sh "${{ matrix.libtorrent_v2 }}" qbittorrent
       #
       - name: "Set release asset name"
-        run: mv -f "${{ matrix.build_dir }}/completed/qbittorrent-nox" "${{ matrix.build_dir }}/completed/qbittorrent-nox-${{ matrix.artifact_name }}"
+        run: mv -f "${{ env.build_dir }}/completed/qbittorrent-nox" "${{ env.build_dir }}/completed/qbittorrent-nox-${{ matrix.artifact_name }}"
       - name: "Set artifact asset name"
-        run: mv -f "${{ matrix.build_dir }}/completed/qbittorrent_graph.png" "${{ matrix.build_dir }}/completed/qbittorrent_${{ matrix.artifact_name }}_graph.png"
+        run: mv -f "${{ env.build_dir }}/completed/qbittorrent_graph.png" "${{ env.build_dir }}/completed/qbittorrent_${{ matrix.artifact_name }}_graph.png"
       #
       - name: "Create release - tag - assets"
         uses: ncipollo/release-action@v1
         with:
           prerelease: ${{ matrix.preview_release }}
-          artifacts: "${{ matrix.build_dir }}/completed/qbittorrent-nox-${{ matrix.artifact_name }}"
+          artifacts: "${{ env.build_dir }}/completed/qbittorrent-nox-${{ matrix.artifact_name }}"
           replacesArtifacts: true
           tag: "${{ env.release_tag }}"
           name: "${{ env.release_title }}"
-          bodyFile: "${{ matrix.build_dir }}/release_info/release.md"
+          bodyFile: "${{ env.build_dir }}/release_info/release.md"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         with:
           name: qbittorrent_${{ matrix.artifact_name }}_graph.png
-          path: ${{ matrix.build_dir }}/completed/qbittorrent_${{ matrix.artifact_name }}_graph.png
+          path: ${{ env.build_dir }}/completed/qbittorrent_${{ matrix.artifact_name }}_graph.png
