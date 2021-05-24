@@ -1358,7 +1358,7 @@ _multi_arch
 application_name libexecinfo
 #
 if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
-	echo -e "${tn} ${uplus}${cg} Installing "${app_name}"${cend}"
+	echo -e "${tn} ${uplus}${cg} Installing ${app_name}${cend}"
 	#
 	curl "${libexecinfo_dev_url}" -o "${qbt_install_dir}/libexecinfo_dev_${alpine_arch}.apk"
 	curl "${libexecinfo_static_url}" -o "${qbt_install_dir}/libexecinfo_static_${alpine_arch}.apk"
