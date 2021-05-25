@@ -793,7 +793,7 @@ _multi_arch() {
 		qbt_cross_host="${qbt_cross_host:-aarch64-linux-musl}"
 		qbt_cross_openssl="${qbt_cross_openssl:-linux-aarch64}"
 		qbt_cross_boost="${qbt_cross_boost:-arm}"
-		qbt_cross_qtbase="${qbt_cross_qt_xplatform-linux-aarch64-gnu-g++}"
+		qbt_cross_qtbase="${qbt_cross_qt_xplatform:-linux-aarch64-gnu-g++}"
 		#
 		CHOST="${qbt_cross_host}"
 		CC="${qbt_cross_host}-gcc"
