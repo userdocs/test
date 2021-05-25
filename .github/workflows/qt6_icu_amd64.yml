@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
 jobs:
   build:
+    name: qt6_icu_amd64
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,7 +31,7 @@ jobs:
       - run: bash qbittorrent-nox-static.sh qtbase -i
       - run: bash qbittorrent-nox-static.sh qttools
       - run: bash qbittorrent-nox-static.sh qbittorrent -qm
-      # - run: bash qbittorrent-nox-static.sh qbittorrent -pr userdocs/qbittorrent-nox-static
+      # - run: bash qbittorrent-nox-static.sh qbittorrent -qm -pr userdocs/qbittorrent-nox-static
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         with:
