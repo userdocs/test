@@ -31,7 +31,7 @@ jobs:
             RANLIB: aarch64-linux-musl-ranlib
             RC: ""
 
-          - name: mingw64_iperf3
+          - name: mingw64_iperf3.exe
             arch: x86_64
             CHOST: x86_64-w64-mingw32
             CC: x86_64-w64-mingw32-gcc
