@@ -62,11 +62,11 @@ jobs:
           export RANLIB=${{ matrix.RANLIB }}
           export RC=${{ matrix.RC }}
           #
-          curl -sL "${{ env.CDN }}${{ matrix.arch }}/$(apk info openssl-dev | awk '{print $1}' | head -n 1).apk" -o "$HOME/openssl-dev_${{ matrix.arch }}.apk"
-          curl -sL "${{ env.CDN }}${{ matrix.arch }}/$(apk info openssl-libs-static | awk '{print $1}' | head -n 1).apk" -o "$HOME/openssl-libs-static_${{ matrix.arch }}.apk"
+          curl -sL "${{ env.CDN }}${{ matrix.alpine_arch }}/$(apk info openssl-dev | awk '{print $1}' | head -n 1).apk" -o "$HOME/openssl-dev_${{ matrix.alpine_arch }}.apk"
+          curl -sL "${{ env.CDN }}${{ matrix.alpine_arch }}/$(apk info openssl-libs-static | awk '{print $1}' | head -n 1).apk" -o "$HOME/openssl-libs-static_${{ matrix.alpine_arch }}.apk"
           #
-          tar xf "$HOME/openssl-dev_${{ matrix.arch }}.apk" --strip-components=1 -C "$HOME"
-          tar xf "$HOME/openssl-libs-static_${{ matrix.arch }}.apk" --strip-components=1 -C "$HOME"
+          tar xf "$HOME/openssl-dev_${{ matrix.alpine_arch }}.apk" --strip-components=1 -C "$HOME"
+          tar xf "$HOME/openssl-libs-static_${{ matrix.alpine_arch }}.apk" --strip-components=1 -C "$HOME"
           #
           git clone https://github.com/esnet/iperf.git $HOME/iperf3
           cd $HOME/iperf3
