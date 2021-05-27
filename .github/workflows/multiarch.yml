@@ -48,8 +48,8 @@ jobs:
         shell: ash {0}
       - name: bootstrap cross build files
         run: |
-          curl -sL https://musl.cc/${{ matrix.CHOST }}-cross.tgz -o $HOME/cross.tgz
-          tar xf $HOME/cross.tgz --transform='s:^\(\./\)::' --strip-components=1 -C $HOME/
+          [[ -z ${{ matrix.CHOST }} ]] && curl -sL https://musl.cc/${{ matrix.CHOST }}-cross.tgz -o $HOME/cross.tgz
+          [[ -z ${{ matrix.CHOST }} ]] && tar xf $HOME/cross.tgz --transform='s:^\(\./\)::' --strip-components=1 -C $HOME/
       - name: build iperf3
         run: |
           export PATH=$HOME/bin:$PATH
