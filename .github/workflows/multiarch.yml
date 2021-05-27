@@ -48,7 +48,7 @@ jobs:
         shell: ash {0}
       - name: bootstrap cross build files
         run: |
-          CHOST="${{ matrix.CHOST }}"
+          CHOST=${{ matrix.CHOST }}
           [[ -n "${CHOST}" ]] && curl -sL "https://musl.cc/${{ matrix.CHOST }}-cross.tgz" -o "$HOME/cross.tgz"
           [[ -n "${CHOST}" ]] && tar xf "$HOME/cross.tgz" --transform='s:^\(\./\)::' --strip-components=1 -C "$HOME"
       - name: build iperf3
