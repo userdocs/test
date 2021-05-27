@@ -15,12 +15,12 @@ jobs:
         include:
           - name: x86_64_iperf3
             arch: x86_64
-            CHOST: ""
+            CHOST: ${{ null }}
             CC: gcc
             AR: ar
             CXX: g++
             RANLIB: ranlib
-            RC: ""
+            RC: ${{ null }}
 
           - name: aarch64_iperf3
             arch: aarch64
@@ -29,7 +29,7 @@ jobs:
             AR: aarch64-linux-musl-ar
             CXX: aarch64-linux-musl-g++
             RANLIB: aarch64-linux-musl-ranlib
-            RC: ""
+            RC: ${{ null }}
 
           - name: mingw64_iperf3.exe
             arch: x86_64
@@ -49,8 +49,8 @@ jobs:
       - name: bootstrap cross build files
         run: |
           CHOST="${{ matrix.CHOST }}"
-          [[ -n ${CHOST} ]] && curl -sL "https://musl.cc/${{ matrix.CHOST }}-cross.tgz" -o "$HOME/cross.tgz"
-          [[ -n ${CHOST} ]] && tar xf "$HOME/cross.tgz" --transform='s:^\(\./\)::' --strip-components=1 -C "$HOME"
+          [[ -n "${CHOST}" ]] && curl -sL "https://musl.cc/${{ matrix.CHOST }}-cross.tgz" -o "$HOME/cross.tgz"
+          [[ -n "${CHOST}" ]] && tar xf "$HOME/cross.tgz" --transform='s:^\(\./\)::' --strip-components=1 -C "$HOME"
       - name: build iperf3
         run: |
           export PATH=$HOME/bin:$PATH
