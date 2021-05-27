@@ -44,10 +44,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
       - name: Install build dependencies
-        run: apk add build-base pkgconf autoconf automake curl tar libtool git perl linux-headers
+        run: apk add bash build-base pkgconf autoconf automake curl tar libtool git perl linux-headers
         shell: ash {0}
       - name: bootstrap cross build files
         run: |
+          bash
           CHOST=${{ matrix.CHOST }}
           [[ -n "${CHOST}" ]] && curl -sL "https://musl.cc/${{ matrix.CHOST }}-cross.tgz" -o "$HOME/cross.tgz"
           [[ -n "${CHOST}" ]] && tar xf "$HOME/cross.tgz" --transform='s:^\(\./\)::' --strip-components=1 -C "$HOME"
