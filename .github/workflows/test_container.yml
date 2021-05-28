@@ -1,4 +1,4 @@
-name: test contianer
+name: test container
 on:
   workflow_dispatch:
 jobs:
@@ -12,7 +12,8 @@ jobs:
       image: ubuntu:hirsute
     steps:
       - uses: actions/checkout@v2.3.4
+      - run: cat /etc/os-release
       - run: apt-get update
-      - run: apt-get get upgrade
+      - run: apt-get upgrade
       - run: apt-get install qtbase5-dev qttools5-dev boost-dev
       - run: echo "all done"
