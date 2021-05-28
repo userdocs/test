@@ -15,5 +15,5 @@ jobs:
       - run: cat /etc/os-release
       - run: apt-get update
       - run: apt-get upgrade -y
-      - run: apt-get install -y qtbase5-dev qttools5-dev boost-dev
+      - run: apt-get install -y qtbase5-dev qttools5-dev libboost-dev
       - run: echo "all done"
