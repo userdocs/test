@@ -10,6 +10,8 @@ jobs:
         shell: bash
     container:
       image: ubuntu:hirsute
+    env:
+      DEBIAN_FRONTEND: noninteractive
     steps:
       - uses: actions/checkout@v2.3.4
       - run: cat /etc/os-release
