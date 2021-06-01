@@ -242,22 +242,22 @@ jobs:
           version: "${{ env.qbittorrent_version }}"
           depends: "zlib1g,libgeoip1,libqt5svg5-dev,qtbase5-dev,qttools5-dev"
           arch: "${{ matrix.arch }}"
-          desc: "${{ matrix.name }}_${{ matrix.arch }} for ${{ matrix.os_id }}_${{ matrix.os_version_id }}"
+          desc: "${{ matrix.name }}-${{ matrix.arch }} for ${{ matrix.os_id }}-${{ matrix.os_version_id }}"
 
-      - name: Remove version from release deb package name
-        run: mv -f "${{ matrix.name }}_${{ env.qbittorrent_version }}_${{ matrix.arch }}.deb" "${{ matrix.os_id }}_${{ matrix.name }}_${{ matrix.arch }}.deb"
+      - name: Remove version from release name and use hyphens
+        run: mv -f "${{ matrix.name }}_${{ env.qbittorrent_version }}_${{ matrix.arch }}.deb" "${{ matrix.os_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: "${{ matrix.name }}_${{ env.qbittorrent_version }}_libtorrent_${{ env.libtorrent_version }}_${{ matrix.os_id }}_${{ matrix.os_version_id }}_${{ matrix.arch }}"
-          path: "${{ matrix.os_id }}_${{ matrix.name }}_${{ matrix.arch }}.deb"
+          name: "${{ matrix.name }}-${{ env.qbittorrent_version }}-libtorrent-${{ env.libtorrent_version }}-${{ matrix.os_id }}-${{ matrix.os_version_id }}-${{ matrix.arch }}"
+          path: "${{ matrix.os_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
 
       - name: "Create release - tag - assets"
         uses: ncipollo/release-action@v1.8.6
         with:
           prerelease: false
-          artifacts: "${{ matrix.os_id }}_${{ matrix.name }}_${{ matrix.arch }}.deb"
+          artifacts: "${{ matrix.os_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
           replacesArtifacts: true
           tag: "${{ env.qbittorrent_version }}_${{ env.libtorrent_version }}"
           name: "qBittorrent ${{ env.qbittorrent_version }} libtorrent ${{ env.libtorrent_version }}"
