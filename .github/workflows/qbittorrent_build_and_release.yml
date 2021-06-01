@@ -245,19 +245,19 @@ jobs:
           desc: "${{ matrix.name }}-${{ matrix.arch }} for ${{ matrix.os_id }}-${{ matrix.os_version_id }}"
 
       - name: Remove version from release name and use hyphens
-        run: mv -f "${{ matrix.name }}_${{ env.qbittorrent_version }}_${{ matrix.arch }}.deb" "${{ matrix.os_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
+        run: mv -f "${{ matrix.name }}_${{ env.qbittorrent_version }}_${{ matrix.arch }}.deb" "${{ matrix.os_id }}-${{ matrix.os_version_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: "${{ matrix.name }}-${{ env.qbittorrent_version }}-libtorrent-${{ env.libtorrent_version }}-${{ matrix.os_id }}-${{ matrix.os_version_id }}-${{ matrix.arch }}"
-          path: "${{ matrix.os_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
+          name: "${{ matrix.os_id }}-${{ matrix.os_version_id }}-${{ matrix.name }}-${{ env.qbittorrent_version }}-libtorrent-${{ env.libtorrent_version }}-${{ matrix.arch }}"
+          path: "${{ matrix.os_id }}-${{ matrix.os_version_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
 
       - name: "Create release - tag - assets"
         uses: ncipollo/release-action@v1.8.6
         with:
           prerelease: false
-          artifacts: "${{ matrix.os_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
+          artifacts: "${{ matrix.os_id }}-${{ matrix.os_version_id }}-${{ matrix.name }}-${{ matrix.arch }}.deb"
           replacesArtifacts: true
           tag: "${{ env.qbittorrent_version }}_${{ env.libtorrent_version }}"
           name: "qBittorrent ${{ env.qbittorrent_version }} libtorrent ${{ env.libtorrent_version }}"
