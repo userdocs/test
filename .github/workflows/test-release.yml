@@ -11,27 +11,27 @@ jobs:
           - arch: amd64
             docker_arch: linux/amd64
             os_id: ubuntu
-            os_version_id: 21.04
+            os_version_id: hirsute
 
           - arch: arm32v7
             docker_arch: linux/arm/v7
             os_id: ubuntu
-            os_version_id: 21.04
+            os_version_id: hirsute
 
           - arch: arm64v8
             docker_arch: linux/arm64
             os_id: ubuntu
-            os_version_id: 21.04
+            os_version_id: hirsute
 
           - arch: ppc64le
             docker_arch: linux/ppc64le
             os_id: ubuntu
-            os_version_id: 21.04
+            os_version_id: hirsute
 
           - arch: s390x
             docker_arch: linux/s390x
             os_id: ubuntu
-            os_version_id: 21.04
+            os_version_id: hirsute
 
           - arch: i386
             docker_arch: linux/i386
