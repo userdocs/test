@@ -236,7 +236,7 @@ jobs:
       - name: Create deb packages
         uses: jiro4989/build-deb-action@v2
         with:
-          package: "${{ matrix.os_id }}_${{ matrix.name }}"
+          package: "${{ matrix.os_id }}-${{ matrix.name }}"
           package_root: build
           maintainer: userdocs
           version: "${{ env.qbittorrent_version }}"
@@ -245,7 +245,7 @@ jobs:
           desc: "${{ matrix.name }}_${{ matrix.arch }} for ${{ matrix.os_id }}_${{ matrix.os_version_id }}"
 
       - name: Remove version from release deb package name
-        run: mv -f "${{ matrix.os_id }}_${{ matrix.name }}_${{ env.qbittorrent_version }}_${{ matrix.arch }}.deb" "${{ matrix.os_id }}_${{ matrix.name }}_${{ matrix.arch }}.deb"
+        run: mv -f "${{ matrix.os_id }}-${{ matrix.name }}_${{ matrix.arch }}.deb" "${{ matrix.os_id }}_${{ matrix.name }}_${{ matrix.arch }}.deb"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2.2.3
