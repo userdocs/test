@@ -22,7 +22,7 @@ jobs:
             os_version_id: hirsute
             desktop_gui: -D GUI=OFF
 
-    name: ${{ matrix.name }} ${{ matrix.os_id }} ${{ matrix.os_version_id }} ${{ matrix.arch }}
+    name: ${{ matrix.name }} ${{ matrix.os_id }}:${{ matrix.os_version_id }} ${{ matrix.arch }}
 
     env:
       libtorrent_branch: RC_2_0 # changes which branch the git checkout command will checkout for libtorrent
@@ -104,14 +104,14 @@ jobs:
       - name: Set full qBittorrent version to variable using strings
         run: echo "qbittorrent_version=$(strings -d build/usr/local/bin/qbittorrent | sed -rn 's|^qBittorrent/(.*)|\1|p' | head -n 1)" >> $GITHUB_ENV
 
-      - name: Create deb package
+      - name: Create deb packages
         uses: jiro4989/build-deb-action@v2
         with:
           package: ${{ matrix.name }}
           package_root: build
           maintainer: userdocs
           version: ${{ env.qbittorrent_version }}
-          depends: "zlib1g, libgeoip1, libqt5svg5-dev, qtbase5-dev, qttools5-dev"
+          depends: "zlib1g,libgeoip1,libqt5svg5-dev,qtbase5-dev,qttools5-dev"
           arch: "${{ matrix.arch }}"
           desc: ${{ matrix.name }} ${{ matrix.arch }} for ${{ matrix.os_id }} ${{ matrix.os_version_id }}"
 
