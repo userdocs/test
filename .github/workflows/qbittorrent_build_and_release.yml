@@ -236,28 +236,31 @@ jobs:
       - name: Create deb packages
         uses: jiro4989/build-deb-action@v2
         with:
-          package: ${{ matrix.name }}
+          package: "${{ matrix.os_id }}_${{ matrix.name }}"
           package_root: build
           maintainer: userdocs
-          version: ${{ env.qbittorrent_version }}
+          version: "${{ env.qbittorrent_version }}"
           depends: "zlib1g,libgeoip1,libqt5svg5-dev,qtbase5-dev,qttools5-dev"
           arch: "${{ matrix.arch }}"
-          desc: ${{ matrix.name }} ${{ matrix.arch }} for ${{ matrix.os_id }} ${{ matrix.os_version_id }}"
+          desc: "${{ matrix.name }}_${{ matrix.arch }} for ${{ matrix.os_id }}_${{ matrix.os_version_id }}"
+
+      - name: Remove version from release deb package name
+        run: mv -f "${{ matrix.os_id }}_${{ matrix.name }}_${{ env.qbittorrent_version }}_${{ matrix.arch }}.deb" "${{ matrix.os_id }}_${{ matrix.name }}_${{ matrix.arch }}.deb"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: ${{ matrix.name }}_${{ env.qbittorrent_version }}_libtorrent_${{ env.libtorrent_version }}_${{ matrix.os_id }}_${{ matrix.os_version_id }}_${{ matrix.arch }}
-          path: ${{ matrix.name }}_${{ env.qbittorrent_version }}_${{ matrix.arch }}.deb
+          name: "${{ matrix.name }}_${{ env.qbittorrent_version }}_libtorrent_${{ env.libtorrent_version }}_${{ matrix.os_id }}_${{ matrix.os_version_id }}_${{ matrix.arch }}"
+          path: "${{ matrix.os_id }}_${{ matrix.name }}_${{ matrix.arch }}.deb"
 
       - name: "Create release - tag - assets"
         uses: ncipollo/release-action@v1.8.6
         with:
           prerelease: false
-          artifacts: ${{ matrix.name }}_${{ env.qbittorrent_version }}_${{ matrix.arch }}.deb
+          artifacts: "${{ matrix.os_id }}_${{ matrix.name }}_${{ matrix.arch }}.deb"
           replacesArtifacts: true
           tag: "${{ env.qbittorrent_version }}_${{ env.libtorrent_version }}"
-          name: "${{ env.qbittorrent_version }}_${{ env.libtorrent_version }}"
-          body: ${{ matrix.name }} built with cmake using the github master branch and the libtorrent RC_2_0 github branch
+          name: "qBittorrent ${{ env.qbittorrent_version }} libtorrent ${{ env.libtorrent_version }}"
+          body: "${{ matrix.name }} built with cmake using the github master branch and the libtorrent RC_2_0 github branch"
           allowUpdates: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: "${{ secrets.GITHUB_TOKEN }}"
