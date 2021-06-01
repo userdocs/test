@@ -261,6 +261,6 @@ jobs:
           replacesArtifacts: true
           tag: "${{ env.qbittorrent_version }}_${{ env.libtorrent_version }}"
           name: "qBittorrent ${{ env.qbittorrent_version }} libtorrent ${{ env.libtorrent_version }}"
-          body: "${{ matrix.name }} built with cmake using the github master branch and the libtorrent RC_2_0 github branch"
+          body: "qBittorrent and qBittorrent-nox built with cmake using the github master branch and the libtorrent RC_2_0 github branch on all supported arches for Debian Bullseye and Ubuntu Hirsute"
           allowUpdates: true
           token: "${{ secrets.GITHUB_TOKEN }}"
