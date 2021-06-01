@@ -8,85 +8,45 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: qbittorrent
+          - name: [qbittorrent, qbittorrent-nox]
             arch: amd64
             docker_arch: linux/amd64
             os_id: ubuntu
             os_version_id: hirsute
-            desktop_nox: ""
-            desktop_gui: ""
+            desktop_nox: ["", -nox]
+            desktop_gui: ["", -D GUI=OFF]
 
-          - name: qbittorrent-nox
-            arch: amd64
-            docker_arch: linux/amd64
-            os_id: ubuntu
-            os_version_id: hirsute
-            desktop_nox: -nox
-            desktop_gui: -D GUI=OFF
-
-          - name: qbittorrent
+          - name: [qbittorrent, qbittorrent-nox]
             arch: arm32v7
             docker_arch: linux/arm/v7
             os_id: ubuntu
             os_version_id: hirsute
-            desktop_nox: ""
-            desktop_gui: ""
+            desktop_nox: ["", -nox]
+            desktop_gui: ["", -D GUI=OFF]
 
-          - name: qbittorrent-nox
-            arch: arm32v7
-            docker_arch: linux/arm/v7
-            os_id: ubuntu
-            os_version_id: hirsute
-            desktop_nox: -nox
-            desktop_gui: -D GUI=OFF
-
-          - name: qbittorrent
+          - name: [qbittorrent, qbittorrent-nox]
             arch: arm64v8
             docker_arch: linux/arm64
             os_id: ubuntu
             os_version_id: hirsute
-            desktop_nox: ""
-            desktop_gui: ""
+            desktop_nox: ["", -nox]
+            desktop_gui: ["", -D GUI=OFF]
 
-          - name: qbittorrent
-            arch: arm64v8
-            docker_arch: linux/arm64
-            os_id: ubuntu
-            os_version_id: hirsute
-            desktop_nox: -nox
-            desktop_gui: -D GUI=OFF
-
-          - name: qbittorrent-nox
+          - name: [qbittorrent, qbittorrent-nox]
             arch: ppc64le
             docker_arch: linux/ppc64le
             os_id: ubuntu
             os_version_id: hirsute
-            desktop_nox: ""
-            desktop_gui: ""
+            desktop_nox: ["", -nox]
+            desktop_gui: ["", -D GUI=OFF]
 
-          - name: qbittorrent-nox
-            arch: ppc64le
-            docker_arch: linux/ppc64le
-            os_id: ubuntu
-            os_version_id: hirsute
-            desktop_nox: -nox
-            desktop_gui: -D GUI=OFF
-
-          - name: qbittorrent-nox
+          - name: [qbittorrent, qbittorrent-nox]
             arch: s390x
             docker_arch: linux/s390x
             os_id: ubuntu
             os_version_id: hirsute
-            desktop_nox: ""
-            desktop_gui: ""
-
-          - name: qbittorrent-nox
-            arch: s390x
-            docker_arch: linux/s390x
-            os_id: ubuntu
-            os_version_id: hirsute
-            desktop_nox: -nox
-            desktop_gui: -D GUI=OFF
+            desktop_nox: ["", -nox]
+            desktop_gui: ["", -D GUI=OFF]
 
     name: "${{ matrix.arch }}"
 
