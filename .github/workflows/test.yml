@@ -1,0 +1,48 @@
+name: qBitorrent test
+on:
+  - workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: i386
+            docker_arch: linux/i386
+            os: hirsute
+          - arch: amd64
+            docker_arch: linux/amd64
+            os: hirsute
+          - arch: arm32v7
+            docker_arch: linux/arm/v7
+            os: hirsute
+          - arch: arm64v8
+            docker_arch: linux/arm64
+            os: hirsute
+          - arch: ppc64le
+            docker_arch: linux/ppc64le
+            os: hirsute
+          - arch: s390x
+            docker_arch: linux/s390x
+            os: hirsute
+    name: "${{ matrix.arch }}"
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - run: |
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - run: |
+          docker run -e "LANG=en_US.UTF-8" -e "DEBIAN_FRONTEND=noninteractive" --platform ${{ matrix.docker_arch }}  -v ${{ github.workspace }}:/root --rm -t ${{ matrix.arch }}/ubuntu:${{ matrix.os }} bash /root/qbit_test.sh
+      - uses: jiro4989/build-deb-action@v2
+        with:
+          package: qBittorrent
+          package_root: build
+          maintainer: userdocs
+          version: 4.3.5
+          arch: "${{ matrix.arch }}"
+          desc: "An example of packaging qBittorrent as a deb"
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: qBittorrent
+          path: qBittorrent_4.3.5_${{ matrix.arch }}.deb
