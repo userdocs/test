@@ -1,4 +1,4 @@
-name: qBitorrent-nox test-release
+name: qBitorrent build and release
 on:
   - workflow_dispatch
 jobs:
@@ -14,12 +14,141 @@ jobs:
             os_id: ubuntu
             os_version_id: hirsute
             desktop_gui: ""
-
           - name: qbittorrent-nox
             arch: amd64
             docker_arch: linux/amd64
             os_id: ubuntu
             os_version_id: hirsute
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: arm32v7
+            docker_arch: linux/arm/v7
+            os_id: ubuntu
+            os_version_id: hirsute
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: arm32v7
+            docker_arch: linux/arm/v7
+            os_id: ubuntu
+            os_version_id: hirsute
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: arm64v8
+            docker_arch: linux/arm64
+            os_id: ubuntu
+            os_version_id: hirsute
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: arm64v8
+            docker_arch: linux/arm64
+            os_id: ubuntu
+            os_version_id: hirsute
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: ppc64le
+            docker_arch: linux/ppc64le
+            os_id: ubuntu
+            os_version_id: hirsute
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: ppc64le
+            docker_arch: linux/ppc64le
+            os_id: ubuntu
+            os_version_id: hirsute
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: s390x
+            docker_arch: linux/s390x
+            os_id: ubuntu
+            os_version_id: hirsute
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: s390x
+            docker_arch: linux/s390x
+            os_id: ubuntu
+            os_version_id: hirsute
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: i386
+            docker_arch: linux/i386
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: i386
+            docker_arch: linux/i386
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: amd64
+            docker_arch: linux/amd64
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: amd64
+            docker_arch: linux/amd64
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: arm32v7
+            docker_arch: linux/arm/v7
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: arm32v7
+            docker_arch: linux/arm/v7
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: arm64v8
+            docker_arch: linux/arm64
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: arm64v8
+            docker_arch: linux/arm64
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: ppc64le
+            docker_arch: linux/ppc64le
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: ppc64le
+            docker_arch: linux/ppc64le
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: -D GUI=OFF
+
+          - name: qbittorrent
+            arch: s390x
+            docker_arch: linux/s390x
+            os_id: debian
+            os_version_id: bullseye
+            desktop_gui: ""
+          - name: qbittorrent-nox
+            arch: s390x
+            docker_arch: linux/s390x
+            os_id: debian
+            os_version_id: bullseye
             desktop_gui: -D GUI=OFF
 
     name: ${{ matrix.name }} ${{ matrix.os_id }}:${{ matrix.os_version_id }} ${{ matrix.arch }}
