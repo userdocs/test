@@ -1,0 +1,21 @@
+name: test container
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    name: OS test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    container:
+      image: ubuntu:hirsute
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - run: cat /etc/os-release
+      - run: apt-get update
+      - run: apt-get upgrade -y
+      - run: apt-get install -y qtbase5-dev qttools5-dev libboost-dev
+      - run: echo "all done"
