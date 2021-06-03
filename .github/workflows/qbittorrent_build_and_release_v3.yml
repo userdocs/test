@@ -15,17 +15,15 @@ jobs:
           - os_id: debian
             os_version_id: hirsute
           - os_id: ubuntu
+            arch: i386
             os_version_id: bullseye
         include:
           - arch: i386
             docker_arch: linux/i386
-            os_id: debian
-            os_version_id: bullseye
             desktop_gui: ""
           - arch: i386
             docker_arch: linux/i386
             os_id: debian
-            os_version_id: bullseye
             desktop_gui: -D GUI=OFF
 
           - arch: amd64
