@@ -11,6 +11,7 @@ jobs:
         os_id: [debian, ubuntu]
         os_version_id: [bullseye, hirsute]
         arch: [i386, amd64, arm32v7, arm64v8, ppc64le, s390x]
+        desktop_gui: ["", -D GUI=OFF]
         exclude:
           - os_id: debian
             os_version_id: hirsute
@@ -21,46 +22,33 @@ jobs:
         include:
           - arch: i386
             docker_arch: linux/i386
-            desktop_gui: ""
           - arch: i386
             docker_arch: linux/i386
-            os_id: debian
-            desktop_gui: -D GUI=OFF
 
           - arch: amd64
             docker_arch: linux/amd64
-            desktop_gui: ""
           - arch: amd64
             docker_arch: linux/amd64
-            desktop_gui: -D GUI=OFF
 
           - arch: arm32v7
             docker_arch: linux/arm/v7
-            desktop_gui: ""
           - arch: arm32v7
             docker_arch: linux/arm/v7
-            desktop_gui: -D GUI=OFF
 
           - arch: arm64v8
             docker_arch: linux/arm64
-            desktop_gui: ""
           - arch: arm64v8
             docker_arch: linux/arm64
-            desktop_gui: -D GUI=OFF
 
           - arch: ppc64le
             docker_arch: linux/ppc64le
-            desktop_gui: ""
           - arch: ppc64le
             docker_arch: linux/ppc64le
-            desktop_gui: -D GUI=OFF
 
           - arch: s390x
             docker_arch: linux/s390x
-            desktop_gui: ""
           - arch: s390x
             docker_arch: linux/s390x
-            desktop_gui: -D GUI=OFF
 
     name: ${{ matrix.name }} ${{ matrix.os_id }}:${{ matrix.os_version_id }} ${{ matrix.arch }}
 
