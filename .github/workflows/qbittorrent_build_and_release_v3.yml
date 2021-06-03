@@ -16,6 +16,7 @@ jobs:
             os_version_id: hirsute
           - os_id: ubuntu
             os_version_id: bullseye
+          - os_id: ubuntu
             arch: i386
         include:
           - arch: i386
