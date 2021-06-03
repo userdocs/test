@@ -19,6 +19,10 @@ jobs:
             os_version_id: bullseye
           - os_id: ubuntu
             arch: i386
+          - name: qbittorrent
+            desktop_gui: -D GUI=OFF
+          - name: qbittorrent-nox
+            desktop_gui: ""
         include:
           - arch: i386
             docker_arch: linux/i386
