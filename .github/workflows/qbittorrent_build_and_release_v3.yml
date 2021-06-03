@@ -15,8 +15,8 @@ jobs:
           - os_id: debian
             os_version_id: hirsute
           - os_id: ubuntu
-            arch: i386
             os_version_id: bullseye
+            arch: i386
         include:
           - arch: i386
             docker_arch: linux/i386
