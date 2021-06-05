@@ -69,5 +69,5 @@ jobs:
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: qbittorrent-nox
+          name: ${{ env.artifact_name }}-qbittorrent-nox
           path: ${{ env.artifact_path }}
