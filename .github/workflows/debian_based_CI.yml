@@ -37,7 +37,7 @@ jobs:
     name: "${{ matrix.container_id }}-${{ matrix.container_codename }}-${{ matrix.libtorrent_version }}-${{ matrix.build_tool_name }}"
     env:
       build_dir: "qbt-build"
-      artifact_name: "${{ matrix.container_id }}-${{ matrix.container_codename }}-${{ matrix.libtorrent_version }}-${{ matrix.build_tool_name }}"
+      artifact_name: "${{ matrix.container_id }}-${{ matrix.container_codename }}-${{ matrix.libtorrent_version }}-${{ matrix.build_tool_name }}-nox"
     container:
       image: ${{ matrix.container_id }}:${{ matrix.container_codename }}
       env:
@@ -64,5 +64,5 @@ jobs:
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: ${{ env.artifact_name }}-qbittorrent-nox
+          name: ${{ env.artifact_name }}
           path: ${{ env.build_dir }}/completed/qbittorrent-nox
