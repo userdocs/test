@@ -61,13 +61,8 @@ jobs:
       - run: bash qbittorrent-nox-static.sh qttools
       - run: bash qbittorrent-nox-static.sh qbittorrent ${{ matrix.build_tool_flag }}
 
-      - name: "Set release asset name for ${{ matrix.build_tool_name }}"
-        run: |
-          mv -f "${{ env.build_dir }}/completed/qbittorrent-nox" "${{ env.build_dir }}/completed/${{ env.artifact_name }}-qbittorrent-nox"
-          echo "artifact_path=${{ env.build_dir }}/completed/${{ env.artifact_name }}-qbittorrent-nox" >> $GITHUB_ENV
-
       - name: Archive code coverage results
         uses: actions/upload-artifact@v2.2.3
         with:
           name: ${{ env.artifact_name }}-qbittorrent-nox
-          path: ${{ env.artifact_path }}
+          path: ${{ env.build_dir }}/completed/qbittorrent-nox
