@@ -28,13 +28,13 @@ jobs:
             icu_matrix_name: icu-
             qt_with_icu: -i
             with_icu: bash qbittorrent-nox-static.sh icu
-        name: "${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}libtorrent-v${{ matrix.libtorrent_version }}"
+    name: "${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}libtorrent-v${{ matrix.libtorrent_version }}"
     env:
       build_dir: "qbt-build"
       qbt_build_tool: "${{ matrix.build_tool }}"
       qbt_cross_name: "${{ matrix.arch_type }}"
       libtorrent_version: "${{ matrix.libtorrent_version }}"
-      name: "${{ matrix.name }}"
+      name: "${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}libtorrent-v${{ matrix.libtorrent_version }}"
     steps:
       - uses: actions/checkout@v2.3.4
 
