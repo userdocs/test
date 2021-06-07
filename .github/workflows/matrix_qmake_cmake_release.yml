@@ -1,7 +1,9 @@
 # @credits https://github.com/c0re100/qBittorrent-Enhanced-Edition/blob/v4_3_x/.github/workflows/build_and_release.yml
 name: qbittorrent-nox cmake and qmake multi build
+
 on:
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,13 +30,16 @@ jobs:
             icu_matrix_name: icu-
             qt_with_icu: -i
             with_icu: bash qbittorrent-nox-static.sh icu
+
     name: "${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}libtorrent-v${{ matrix.libtorrent_version }}"
+
     env:
       build_dir: "qbt-build"
       qbt_build_tool: "${{ matrix.build_tool }}"
       qbt_cross_name: "${{ matrix.arch_type }}"
       libtorrent_version: "${{ matrix.libtorrent_version }}"
       name: "${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}libtorrent-v${{ matrix.libtorrent_version }}"
+
     steps:
       - uses: actions/checkout@v2.3.4
 
