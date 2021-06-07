@@ -34,7 +34,7 @@ jobs:
       qbt_build_tool: "${{ matrix.build_tool }}"
       qbt_cross_name: "${{ matrix.arch_type }}"
       libtorrent_version: "${{ matrix.libtorrent_version }}"
-      name: "${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}libtorrent-v${{ matrix.libtorrent_version }}"
+      name: "${{ jobs.name }}"
     steps:
       - uses: actions/checkout@v2.3.4
 
