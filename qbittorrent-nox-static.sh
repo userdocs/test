@@ -909,6 +909,8 @@ _release_info() {
 	TITLE_INFO
 	#
 	cat > "${release_info_dir}/release.md" <<- RELEASE_INFO
+		## Build info
+
 		Qbittorrent: ${qbittorrent_github_tag#release-}
 		Qt: ${qttools_github_tag#v}
 		Libtorrent: ${libtorrent_github_tag#v}
@@ -916,7 +918,7 @@ _release_info() {
 		OpenSSL: ${openssl_pretty_version}
 		zlib: ${zlib_github_tag#v}
 
-		### Supported Architectures
+		## Supported Architectures
 
 		These builds were created on Alpine linux using musl and [prebuilt toolchains](https://musl.cc/#binaries) for:
 
@@ -927,17 +929,21 @@ _release_info() {
 		|   aarch64   |   aarch64-linux-musl-cross    |
 		|   x86_64    |      None - native build      |
 
-		### Using this build matrix for libtorrent v${libtorrent_github_tag}
+		## Build matrix for libtorrent ${libtorrent_github_tag}
 
-		ℹ️ qt5 is still built with qmake. qt6 will use cmake
+		ℹ️ qt5 is still built with qmake. qt6 will use cmake when qbittorrent adds qt6 support.
 
-		|  Alpine Arch  | iconv | icu | qmake |  cmake  | libtorrent ${libtorrent_github_tag} |
+		ℹ️ [Check the build table for more info](https://github.com/userdocs/qbittorrent-nox-static#build-table---dependencies---arch---os---build-tools)
+
+		|  Alpine Arch  | iconv | icu | b2 + qmake |  cmake  | libtorrent ${libtorrent_github_tag} |
 		| :-----------: | :---: | :---: | :---: | :---: | :------------------------------------: |
 		| All supported |   ✅   |   ❌   |   ✅   |   ❌   |                   ✅                    |
 		| All supported |   ✅   |   ✅   |   ✅   |   ❌   |                   ✅                    |
 		| All supported |   ✅   |   ❌   |   ❌   |   ✅   |                   ✅                    |
 		| All supported |   ✅   |   ✅   |   ❌   |   ✅   |                   ✅                    |
-		        
+						        
+		⚠️ qmake builds are stripped but cmake builds are not. Use cmake builds for stacktrace / debugging.
+
 	RELEASE_INFO
 	#
 	return
