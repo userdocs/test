@@ -89,7 +89,7 @@ set_default_values() {
 	#
 	qbt_patches_url="" # Provide a git username and repo in this format - username/repo" - In this repo the structure needs to be like this /patches/libtorrent/1.2.11/patch and/or /patches/qbittorrent/4.3.1/patch and your patch file will be automatically fetched and loadded for those matching tags.
 	#
-	libtorrent_version=${libtorrent_version:-1.2} # Set this here so it is easy to see and change
+	libtorrent_version="${libtorrent_version:-1.2}" # Set this here so it is easy to see and change
 	#
 	qt_version=${qt_version:-5.15} # Set this here so it is easy to see and change. PATCH versions are detected automatically - 5.15.2 will be used over 5.15.0
 	#
