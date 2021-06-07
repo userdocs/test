@@ -14,14 +14,14 @@ jobs:
       fail-fast: false
       matrix:
         arch_type: [x86_64, armv6, armv7, aarch64]
-        libtorrent_version: [1.2, 2.0]
+        libtorrent_version: ["1.2", "2.0"]
         icu_step_name: [icu skipped, icu]
         include:
-          - libtorrent_version: 2.0
+          - libtorrent_version: "2.0"
             preview_release: true
             libtorrent_matrix_name: lt-v2.0
 
-          - libtorrent_version: 1.2
+          - libtorrent_version: "1.2"
             preview_release: false
             libtorrent_matrix_name: lt-v1.2
 
