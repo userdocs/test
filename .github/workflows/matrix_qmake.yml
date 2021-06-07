@@ -21,7 +21,7 @@ jobs:
             preview_release: true
             libtorrent_matrix_name: lt-v2.0
 
-          - libtorrent_version: ""
+          - libtorrent_version: 1.2
             preview_release: false
             libtorrent_matrix_name: lt-v1.2
 
