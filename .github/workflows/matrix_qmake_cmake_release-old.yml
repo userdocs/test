@@ -1,5 +1,5 @@
 # @credits https://github.com/c0re100/qBittorrent-Enhanced-Edition/blob/v4_3_x/.github/workflows/build_and_release.yml
-name: qbittorrent-nox cmake and qmake multi build old
+name: qbittorrent-nox cmake and qmake multi build
 
 on:
   workflow_dispatch:
@@ -24,9 +24,11 @@ jobs:
             build_tool_name: "cmake-"
 
           - libtorrent_version: "2.0"
+            libtorrent_tag: -lt v2.0.3
             preview_release: true
 
           - libtorrent_version: "1.2"
+            libtorrent_tag: -lt v1.2.13
             preview_release: false
 
           - icu_step_name: icu
@@ -50,7 +52,7 @@ jobs:
         shell: ash {0}
 
       - name: Bootstrap
-        run: bash qbittorrent-nox-static.sh -bs-a
+        run: bash qbittorrent-nox-static.sh ${{ matrix.libtorrent_tag }} -bs-a
 
       - name: Bootstrap release tag
         run: echo "release_tag=$(cat ${{ env.build_dir }}/release_info/tag.md)" >> $GITHUB_ENV
@@ -77,7 +79,7 @@ jobs:
         run: bash qbittorrent-nox-static.sh boost
 
       - name: libtorrent
-        run: bash qbittorrent-nox-static.sh libtorrent
+        run: bash qbittorrent-nox-static.sh ${{ matrix.libtorrent_tag }} libtorrent
 
       - name: qtbase ${{ matrix.qt_with_icu }}
         run: bash qbittorrent-nox-static.sh ${{ matrix.qt_with_icu }} qtbase
