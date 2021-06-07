@@ -991,7 +991,7 @@ _fix_static_links() {
 	for file in "${library_list[@]}"; do
 		if [[ "$(readlink "${lib_dir}/${file}.so")" != "${file}.a" ]]; then
 			ln -fsn "${file}.a" "${lib_dir}/${file}.so"
-			echo "${lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}.fix_static_links.log.txt"
+			echo "${lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}.fix-static-links.log.txt"
 		fi
 	done
 	return
@@ -1004,7 +1004,7 @@ _fix_multiarch_static_links() {
 		for file in "${library_list[@]}"; do
 			if [[ "$(readlink "${multiarch_lib_dir}/${file}.so")" != "${file}.a" ]]; then
 				ln -fsn "${file}.a" "${multiarch_lib_dir}/${file}.so"
-				echo "${multiarch_lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}.fix_static_links.log.txt"
+				echo "${multiarch_lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}.fix-static-links.log.txt"
 			fi
 		done
 		return
