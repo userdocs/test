@@ -848,7 +848,7 @@ _multi_arch() {
 			AR="${qbt_cross_host}-ar"
 			CXX="${qbt_cross_host}-g++"
 			#
-			mkdir -p "${qbt_install_dir}"
+			mkdir -p "${qbt_install_dir}/logs"
 			#
 			[[ ! -f "${qbt_install_dir}/${qbt_cross_host}-cross.tgz" ]] && curl "https://musl.cc/${qbt_cross_host}-cross.tgz" > "${qbt_install_dir}/${qbt_cross_host}-cross.tgz"
 			tar xf "${qbt_install_dir}/${qbt_cross_host}-cross.tgz" --strip-components=1 -C "${qbt_install_dir}"
@@ -989,7 +989,7 @@ _fix_static_links() {
 	for file in "${library_list[@]}"; do
 		if [[ "$(readlink "${lib_dir}/${file}.so")" != "${file}.a" ]]; then
 			ln -fsn "${file}.a" "${lib_dir}/${file}.so"
-			echo "${lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}.fix-static-links.log.txt"
+			echo "${lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}-fix-static-links.log.txt"
 		fi
 	done
 	return
@@ -1002,7 +1002,7 @@ _fix_multiarch_static_links() {
 		for file in "${library_list[@]}"; do
 			if [[ "$(readlink "${multiarch_lib_dir}/${file}.so")" != "${file}.a" ]]; then
 				ln -fsn "${file}.a" "${multiarch_lib_dir}/${file}.so"
-				echo "${multiarch_lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}.fix-static-links.log.txt"
+				echo "${multiarch_lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}-fix-static-links.log.txt"
 			fi
 		done
 		return
