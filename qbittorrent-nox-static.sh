@@ -1859,7 +1859,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 	#
 	if [[ "${qbt_build_tool}" == 'cmake' && "${qt_version}" =~ ^(6\.[0-9])$ ]]; then
 		mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
-		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qtbase_github_tag}/dep_graph.dot" -G Ninja -B build \
+		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qtbase_github_tag}/dep-graph.dot" -G Ninja -B build \
 			"${multi_libtorrent[@]}" \
 			-D CMAKE_BUILD_TYPE="release" \
 			-D CMAKE_CXX_STANDARD="${standard}" \
@@ -1875,7 +1875,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		#
 		cmake --install build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 		#
-		dot -Tpng -o "${qbt_install_dir}/completed/${app_name}_graph.png" "${qbt_install_dir}/graphs/${qtbase_github_tag}/dep_graph.dot"
+		dot -Tpng -o "${qbt_install_dir}/completed/${app_name}-graph.png" "${qbt_install_dir}/graphs/${qtbase_github_tag}/dep-graph.dot"
 	elif [[ "${qt_version}" =~ ^(5\.[0-9]{1,2})$ ]]; then
 		"${qbt_install_dir}/bin/qmake" -set prefix "${qbt_install_dir}" |& tee "${qbt_install_dir}/logs/${app_name}.log.txt"
 		#
@@ -1917,7 +1917,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		fi
 		if [[ "${qbt_build_tool}" == 'cmake' ]]; then
 			mkdir -p "${qbt_install_dir}/graphs/${qbittorrent_github_tag}"
-			cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qbittorrent_github_tag}/dep_graph.dot" -G Ninja -B build \
+			cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qbittorrent_github_tag}/dep-graph.dot" -G Ninja -B build \
 				"${multi_qbittorrent[@]}" \
 				-D CMAKE_BUILD_TYPE="release" \
 				-D CMAKE_CXX_STANDARD="${standard}" \
@@ -1933,7 +1933,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			#
 			cmake --install build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 			#
-			dot -Tpng -o "${qbt_install_dir}/completed/${app_name}_graph.png" "${qbt_install_dir}/graphs/${qbittorrent_github_tag}/dep_graph.dot"
+			dot -Tpng -o "${qbt_install_dir}/completed/${app_name}-graph.png" "${qbt_install_dir}/graphs/${qbittorrent_github_tag}/dep-graph.dot"
 		else
 			./bootstrap.sh |& tee "${qbt_install_dir}/logs/${app_name}.log.txt"
 			./configure \
