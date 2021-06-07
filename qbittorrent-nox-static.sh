@@ -916,9 +916,9 @@ _release_info() {
 		OpenSSL: ${openssl_pretty_version}
 		zlib: ${zlib_github_tag#v}
 
-		These builds were created on Alpine linux using musl and [prebuilt toolchains](https://musl.cc/#binaries) for:
+		### Supported Architectures
 
-		### Support Architectures
+		These builds were created on Alpine linux using musl and [prebuilt toolchains](https://musl.cc/#binaries) for:
 
 		| Alpine Arch |       Cross build files       |
 		| :---------: | :---------------------------: |
@@ -929,12 +929,14 @@ _release_info() {
 
 		### Using this build matrix for libtorrent v${libtorrent_github_tag}
 
-		|  Alpine Arch  | qmake | cmake | iconv |  icu  | libtorrent ${libtorrent_github_tag} |
+		ℹ️ qt5 is still built with qmake. qt6 will use cmake
+
+		|  Alpine Arch  | iconv | icu | qmake |  cmake  | libtorrent ${libtorrent_github_tag} |
 		| :-----------: | :---: | :---: | :---: | :---: | :------------------------------------: |
 		| All supported |   ✅   |   ❌   |   ✅   |   ❌   |                   ✅                    |
-		| All supported |   ✅   |   ❌   |   ✅   |   ✅   |                   ✅                    |
-		| All supported |   ❌   |   ✅   |   ✅   |   ❌   |                   ✅                    |
-		| All supported |   ❌   |   ✅   |   ✅   |   ✅   |                   ✅                    |
+		| All supported |   ✅   |   ✅   |   ✅   |   ❌   |                   ✅                    |
+		| All supported |   ✅   |   ❌   |   ❌   |   ✅   |                   ✅                    |
+		| All supported |   ✅   |   ✅   |   ❌   |   ✅   |                   ✅                    |
 		        
 	RELEASE_INFO
 	#
