@@ -35,6 +35,7 @@ jobs:
       qbt_build_tool: "${{ matrix.build_tool }}"
       qbt_cross_name: "${{ matrix.arch_type }}"
       libtorrent_version: "${{ matrix.libtorrent_version }}"
+      name: "${{ matrix.name }}"
     steps:
       - uses: actions/checkout@v2.3.4
 
@@ -83,10 +84,6 @@ jobs:
       - name: "Set release asset name"
         run: mv -f "${{ env.build_dir }}/completed/qbittorrent-nox" "${{ env.build_dir }}/completed/${{ matrix.arch_type }}-${{ env.qbt_build_tool }}-${{ matrix.icu_matrix_name }}qbittorrent-nox"
 
-      - name: "Set artifact asset name"
-        if: env.qbt_build_tool == 'cmake'
-        run: mv -f "${{ env.build_dir }}/completed/qbittorrent_graph.png" "${{ env.build_dir }}/completed/${{ matrix.name }}-qbittorrent-graph.png"
-
       - name: "Create release - tag - assets"
         uses: ncipollo/release-action@v1.8.6
         with:
@@ -103,5 +100,7 @@ jobs:
         if: env.qbt_build_tool == 'cmake'
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: ${{ matrix.name }}-qbittorrent-graph.png"
-          path: ${{ env.build_dir }}/completed/qbittorrent_graph.png
+          name: ${{ env.name }}-qbittorrent-graph.png"
+          path: |
+            ${{ env.build_dir }}/completed/libtorrent-graph.png
+            ${{ env.build_dir }}/completed/qbittorrent-graph.png
