@@ -131,18 +131,8 @@ set_default_values() {
 		[[ "${qbt_skip_icu}" != 'no' ]] && delete+=("icu")
 	fi
 	#
-	if [[ ${qbt_cross_name} =~ ^(armv6|armv7|aarch64)$ ]]; then
-		case "${qbt_cross_name}" in
-			armv6)
-				alpine_arch="armhf"
-				;;
-			armv7)
-				alpine_arch="armv7"
-				;;
-			aarch64)
-				alpine_arch="aarch64"
-				;;
-		esac
+	if [[ ${qbt_cross_name} =~ ^(armhf|armv7|aarch64)$ ]]; then
+		alpine_arch="${qbt_cross_name}"
 	else
 		alpine_arch="$(uname -m)"
 	fi
@@ -269,14 +259,14 @@ while (("${#}")); do
 			shift 2
 			;;
 		-ma | --multi-arch)
-			if [[ -n "${2}" && "${2}" =~ ^(armv6|armv7|aarch64)$ ]]; then
+			if [[ -n "${2}" && "${2}" =~ ^(armhf|armv7|aarch64)$ ]]; then
 				qbt_cross_name="${2}"
 				shift 2
 			else
 				echo
 				echo -e " ${ulrc} You must provide a valid arch option when using${cend} ${clb}-ma${cend}"
 				echo
-				echo -e " ${ulyc} armv6${cend}"
+				echo -e " ${ulyc} armhf${cend}"
 				echo -e " ${ulyc} armv7${cend}"
 				echo -e " ${ulyc} aarch64${cend}"
 				echo
@@ -825,12 +815,12 @@ post_command() {
 # Multi Arch
 #######################################################################################################################################################
 _multi_arch() {
-	if [[ "${qbt_cross_name}" =~ ^(armv6|armv7|aarch64)$ ]]; then
+	if [[ "${qbt_cross_name}" =~ ^(armhf|armv7|aarch64)$ ]]; then
 		if [[ "${what_version_codename}" =~ ^(alpine)$ ]]; then
 			echo -e "${tn} ${ugc}${cly} Using Multi Arch: ${qbt_cross_name}${cend}"
 			#
 			case "${qbt_cross_name}" in
-				armv6)
+				armhf)
 					alpine_arch="armhf"
 					qbt_cross_host="armv6-linux-musleabihf"
 					qbt_cross_openssl="linux-armv4"
@@ -862,6 +852,8 @@ _multi_arch() {
 			#
 			[[ ! -f "${qbt_install_dir}/${qbt_cross_host}-cross.tgz" ]] && curl "https://musl.cc/${qbt_cross_host}-cross.tgz" > "${qbt_install_dir}/${qbt_cross_host}-cross.tgz"
 			tar xf "${qbt_install_dir}/${qbt_cross_host}-cross.tgz" --strip-components=1 -C "${qbt_install_dir}"
+			#
+			_fix_multiarch_static_links "${qbt_cross_host}"
 			#
 			multi_iconv=("--host=${qbt_cross_host}") # ${multi_iconv[@]}
 			#
@@ -924,7 +916,30 @@ _release_info() {
 		OpenSSL: ${openssl_pretty_version}
 		zlib: ${zlib_github_tag#v}
 
-		These builds were created on Alpine linux using musl and [prebuilt toolchains](https://musl.cc/#binaries) for armv6 armv7r aarch64
+		These builds were created on Alpine linux using musl and [prebuilt toolchains](https://musl.cc/#binaries) for:
+
+		### Support Architectures
+
+		| Alpine Arch |       Cross build files       |
+		| :---------: | :---------------------------: |
+		|    armhf    | armv6-linux-musleabihf-cross  |
+		|    armv7    | armv7r-linux-musleabihf-cross |
+		|   aarch64   |   aarch64-linux-musl-cross    |
+		|   x86_64    |      None - native build      |
+
+		### Using this build matrix
+
+		|  Alpine Arch  | qmake | cmake | iconv |  icu | libtorrent v1 | libtorrent v2 |
+		| :-----------: | :-----: | :----: | :----: | :---: | :------------: | :------------: |
+		| All supported |   ✅   |   ❌   |   ✅   |    ❌ |       ✅       |       ❌       |
+		| All supported |   ✅   |   ❌   |   ✅   |    ✅ |       ✅       |       ❌       |
+		| All supported |   ✅   |   ❌   |   ✅   |    ❌ |       ❌       |       ✅       |
+		| All supported |   ✅   |   ❌   |   ✅   |    ✅ |       ❌       |       ✅       |
+		| All supported |   ❌   |   ✅   |   ✅   |    ❌ |       ✅       |       ❌       |
+		| All supported |   ❌   |   ✅   |   ✅   |    ✅ |       ✅       |       ❌       |
+		| All supported |   ❌   |   ✅   |   ✅   |    ❌ |       ❌       |       ✅       |
+		| All supported |   ❌   |   ✅   |   ✅   |    ✅ |       ❌       |       ✅       |
+		        
 	RELEASE_INFO
 	#
 	return
@@ -981,6 +996,21 @@ _fix_static_links() {
 	done
 	return
 }
+_fix_multiarch_static_links() {
+	if [[ -d "${qbt_install_dir}/${qbt_cross_host}" ]]; then
+		log_name="$1"
+		multiarch_lib_dir="${qbt_install_dir}/${qbt_cross_host}/lib"
+		readarray -t library_list < <(find "${multiarch_lib_dir}" -maxdepth 1 -exec bash -c 'basename "$0" ".${0##*.}"' {} \; | sort | uniq -d)
+		for file in "${library_list[@]}"; do
+			if [[ "$(readlink "${multiarch_lib_dir}/${file}.so")" != "${file}.a" ]]; then
+				ln -fsn "${file}.a" "${multiarch_lib_dir}/${file}.so"
+				echo "${multiarch_lib_dir}${file}.so changed to point to ${file}.a" >> "${qbt_install_dir}/logs/${log_name}.fix_static_links.log.txt"
+			fi
+		done
+		return
+	fi
+}
+
 #######################################################################################################################################################
 # error functions
 #######################################################################################################################################################
@@ -1028,14 +1058,14 @@ while (("${#}")); do
 			shift
 			;;
 		-bs-ma | --boot-strap-multi-arch)
-			if [[ -n "${2}" && "${2}" =~ ^(armv6|armv7|aarch64)$ ]]; then
+			if [[ -n "${2}" && "${2}" =~ ^(armhf|armv7|aarch64)$ ]]; then
 				qbt_cross_name="${2}"
 				shift 2
 			else
 				echo
 				echo -e " ${ulrc} You must provide a valid arch option when using${cend} ${clb}-ma${cend}"
 				echo
-				echo -e " ${ulyc} armv6${cend}"
+				echo -e " ${ulyc} armhf${cend}"
 				echo -e " ${ulyc} armv7${cend}"
 				echo -e " ${ulyc} aarch64${cend}"
 				echo
@@ -1220,7 +1250,7 @@ while (("${#}")); do
 			echo
 			echo -e " This switch bootstraps the musl cross build files needed for any provided and supported architecture"
 			echo
-			echo -e " ${uyc} armv6"
+			echo -e " ${uyc} armhf"
 			echo -e " ${uyc} armv7"
 			echo -e " ${uyc} aarch64"
 			echo
@@ -1318,7 +1348,7 @@ while (("${#}")); do
 			echo
 			echo -e " This switch will make the script use the cross build configuration for these supported architectures"
 			echo
-			echo -e " ${uyc} armv6"
+			echo -e " ${uyc} armhf"
 			echo -e " ${uyc} armv7"
 			echo -e " ${uyc} aarch64"
 			echo
@@ -1592,7 +1622,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' || "${1}" = "${app_name}" ]]; then
 	custom_flags_reset
 	download_file "${app_name}" "${!app_url}" "/source"
 	#
-	if [[ "${qbt_cross_name}" =~ ^(armv6|armv7|aarch64)$ ]]; then
+	if [[ "${qbt_cross_name}" =~ ^(armhf|armv7|aarch64)$ ]]; then
 		mkdir -p "${qbt_install_dir}/${app_name}/cross"
 		_cd "${qbt_install_dir}/${app_name}/cross"
 		"${qbt_install_dir}/${app_name}/source/runConfigureICU" Linux/gcc
@@ -1706,14 +1736,16 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			dot -Tpng -o "${qbt_install_dir}/completed/${app_name}_graph.png" "${qbt_install_dir}/graphs/${libtorrent_github_tag}/dep_graph.dot"
 			#
 		else
+			[[ ${qbt_cross_name} =~ ^(armhf|armv7)$ ]] && arm_libatomic="-l:libatomic.a"
+			#
 			if [[ "${libtorrent_github_tag}" =~ ^(RC_2|v2\.0\..*) ]]; then
 				lt_version_options=()
-				libtorrent_libs="-l:libboost_system.a -l:libtorrent-rasterbar.a -l:libtry_signal.a"
+				libtorrent_libs="-l:libboost_system.a -l:libtorrent-rasterbar.a -l:libtry_signal.a ${arm_libatomic}"
 				lt_cmake_flags="-DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_NO_DEPRECATED -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO -DTORRENT_SSL_PEERS -DOPENSSL_NO_SSL2"
 			else
 				lt_version_options=("iconv=on")
-				libtorrent_libs="-l:libboost_system.a -l:libtorrent-rasterbar.a -l:libiconv.a"
-				lt_cmake_flags="-DBOOST_ASIO_ENABLE_CANCELIO -DTORRENT_USE_ICONV -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO"
+				libtorrent_libs="-l:libboost_system.a -l:libtorrent-rasterbar.a ${arm_libatomic} -l:libiconv.a"
+				lt_cmake_flags="-fexceptions -DBOOST_ASIO_ENABLE_CANCELIO -DTORRENT_USE_ICONV -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO"
 			fi
 			#
 			"${qbt_install_dir}/boost/b2" "${multi_libtorrent[@]}" -j"$(nproc)" "${lt_version_options[@]}" address-model="$(getconf LONG_BIT)" "${lt_debug}" optimization=speed cxxstd="${standard}" dht=on encryption=on crypto=openssl i2p=on extensions=on variant=release threading=multi link=static boost-link=static cxxflags="${CXXFLAGS}" cflags="${CPPFLAGS}" linkflags="${LDFLAGS}" install --prefix="${qbt_install_dir}" |& tee "${qbt_install_dir}/logs/${app_name}.log.txt"
@@ -1754,7 +1786,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 	download_folder "${app_name}" "${!app_github_url}"
 	#
 	case "${qbt_cross_name}" in
-		armv6 | armv7)
+		armhf | armv7)
 			sed "s|arm-linux-gnueabi|${qbt_cross_host}|g" -i "${qbt_install_dir}/qtbase/mkspecs/linux-arm-gnueabi-g++/qmake.conf"
 			;;
 		aarch64)
