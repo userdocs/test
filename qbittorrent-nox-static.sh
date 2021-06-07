@@ -55,7 +55,7 @@ cend="\e[0m"  # [c]olor[end]
 #######################################################################################################################################################
 what_id="$(source /etc/os-release && printf "%s" "${ID}")"                             # Get the main platform name, for example: debian, ubuntu or alpine
 what_version_codename="$(source /etc/os-release && printf "%s" "${VERSION_CODENAME}")" # Get the codename for this this OS. Note, Alpine does not have a unique codename.
-what_version_id="$(source /etc/os-release && printf "%s" "${VERSION_ID}")"             # Get the version number for this codename, for example: 10, 20.04, 3.12.4
+what_version_id="$(source /etc/os-release && printf "%s" "${VERSION_ID%_*}")"          # Get the version number for this codename, for example: 10, 20.04, 3.12.4
 #
 if [[ "${what_id}" =~ ^(alpine)$ ]]; then # If alpine, set the codename to alpine. We check for min v3.10 later with codenames.
 	what_version_codename="alpine"
@@ -131,8 +131,18 @@ set_default_values() {
 		[[ "${qbt_skip_icu}" != 'no' ]] && delete+=("icu")
 	fi
 	#
-	if [[ ${qbt_cross_name} =~ ^(aarch64)$ ]]; then
-		alpine_arch="aarch64"
+	if [[ ${qbt_cross_name} =~ ^(armv6|armv7|aarch64)$ ]]; then
+		case "${qbt_cross_name}" in
+			armv6)
+				alpine_arch="armhf"
+				;;
+			armv7)
+				alpine_arch="armv7"
+				;;
+			aarch64)
+				alpine_arch="aarch64"
+				;;
+		esac
 	else
 		alpine_arch="$(uname -m)"
 	fi
@@ -259,7 +269,21 @@ while (("${#}")); do
 			shift 2
 			;;
 		-ma | --multi-arch)
-			qbt_cross_name="aarch64"
+			if [[ -n "${2}" && "${2}" =~ ^(armv6|armv7|aarch64)$ ]]; then
+				qbt_cross_name="${2}"
+				shift 2
+			else
+				echo
+				echo -e " ${ulrc} You must provide a valid arch option when using${cend} ${clb}-ma${cend}"
+				echo
+				echo -e " ${ulyc} armv6${cend}"
+				echo -e " ${ulyc} armv7${cend}"
+				echo -e " ${ulyc} aarch64${cend}"
+				echo
+				echo -e " ${ulgc} example usage:${clb} -ma aarch64${cend}"
+				echo
+				exit 1
+			fi
 			shift
 			;;
 		-o | --optimize)
@@ -429,24 +453,34 @@ set_module_urls() {
 	ninja_github_tag="$(git_git ls-remote -t --sort=-v:refname --refs https://github.com/ninja-build/ninja.git | awk '/v/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | head -n 1)"
 	ninja_version="${ninja_github_tag#v}"
 	#
-	bison_version="$(git_git ls-remote -q -t --refs https://git.savannah.gnu.org/git/bison.git | awk '/\/v/{sub("refs/tags/v", "");sub("(.*)((-|_)[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
-	bison_url="http://ftpmirror.gnu.org/gnu/bison/bison-${bison_version}.tar.gz"
+	if [[ ! "${what_id}" =~ ^(alpine)$ ]]; then
+		#bison_version="$(git_git ls-remote -q -t --refs https://git.savannah.gnu.org/git/bison.git | awk '/\/v/{sub("refs/tags/v", "");sub("(.*)((-|_)[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
+		#bison_url="http://ftpmirror.gnu.org/gnu/bison/bison-${bison_version}.tar.gz"
+		bison_url="http://ftp.gnu.org/gnu/bison/$(grep -Eo 'bison-([0-9]{1,3}[.]?)([0-9]{1,3}[.]?)([0-9]{1,3}?)\.tar.gz' <(curl http://ftp.gnu.org/gnu/bison/) | sort -V | tail -1)"
+	fi
 	#
-	gawk_version="$(git_git ls-remote -q -t --refs https://git.savannah.gnu.org/git/gawk.git | awk '/\/tags\/gawk/{sub("refs/tags/gawk-", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
-	gawk_url="http://ftpmirror.gnu.org/gnu/gawk/gawk-${gawk_version}.tar.gz"
+	if [[ ! "${what_id}" =~ ^(alpine)$ ]]; then
+		#gawk_version="$(git_git ls-remote -q -t --refs https://git.savannah.gnu.org/git/gawk.git | awk '/\/tags\/gawk/{sub("refs/tags/gawk-", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
+		#gawk_url="http://ftpmirror.gnu.org/gnu/gawk/gawk-${gawk_version}.tar.gz"
+		gawk_url="http://ftp.gnu.org/gnu/gawk/$(grep -Eo 'gawk-([0-9]{1,3}[.]?)([0-9]{1,3}[.]?)([0-9]{1,3}?)\.tar.gz' <(curl http://ftp.gnu.org/gnu/gawk/) | sort -V | tail -1)"
+	fi
 	#
-	if [[ "${what_version_codename}" =~ ^(hirsute)$ ]]; then
-		glibc_version="$(git_git ls-remote -q -t --refs https://sourceware.org/git/glibc.git | awk '/\/tags\/glibc-[0-9]\.[0-9]{2}$/{sub("refs/tags/glibc-", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
-		glibc_url="http://ftpmirror.gnu.org/gnu/libc/glibc-${glibc_version}.tar.gz"
-	else
-		glibc_url="http://ftpmirror.gnu.org/gnu/libc/glibc-2.31.tar.gz" # pin to the same version for this OS otherwise we get build errors
+	if [[ ! "${what_id}" =~ ^(alpine)$ ]]; then
+		if [[ "${what_version_codename}" =~ ^(hirsute)$ ]]; then
+			#glibc_version="$(git_git ls-remote -q -t --refs https://sourceware.org/git/glibc.git | awk '/\/tags\/glibc-[0-9]\.[0-9]{2}$/{sub("refs/tags/glibc-", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
+			#glibc_url="http://ftpmirror.gnu.org/gnu/libc/glibc-${glibc_version}.tar.gz"
+			glibc_url="http://ftp.gnu.org/gnu/glibc/$(grep -Eo 'glibc-([0-9]{1,3}[.]?)([0-9]{1,3}[.]?)([0-9]{1,3}?)\.tar.gz' <(curl http://ftp.gnu.org/gnu/glibc/) | sort -V | tail -1)"
+		else
+			glibc_url="http://ftp.gnu.org/gnu/libc/glibc-2.31.tar.gz" # pin to the same version for this OS otherwise we get build errors
+		fi
 	fi
 	#
 	zlib_github_tag="$(git_git ls-remote -q -t --refs https://github.com/madler/zlib.git | awk '{sub("refs/tags/", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
 	zlib_url="https://github.com/madler/zlib/archive/${zlib_github_tag}.tar.gz"
 	#
-	iconv_github_tag="$(git_git ls-remote -q -t --refs https://git.savannah.gnu.org/git/libiconv.git | awk '/v/{sub("refs/tags/v", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
-	iconv_url="https://ftp.gnu.org/gnu/libiconv/libiconv-${iconv_github_tag}.tar.gz"
+	#iconv_github_tag="$(git_git ls-remote -q -t --refs https://git.savannah.gnu.org/git/libiconv.git | awk '/v/{sub("refs/tags/v", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
+	#iconv_url="http://ftpmirror.gnu.org/gnu/libiconv/libiconv-${iconv_github_tag}.tar.gz"
+	iconv_url="http://ftp.gnu.org/gnu/libiconv/$(grep -Eo 'libiconv-([0-9]{1,3}[.]?)([0-9]{1,3}[.]?)([0-9]{1,3}?)\.tar.gz' <(curl http://ftp.gnu.org/gnu/libiconv/) | sort -V | tail -1)"
 	#
 	icu_github_tag="$(git_git ls-remote -q -t --refs https://github.com/unicode-org/icu.git | awk '/\/release-/{sub("refs/tags/release-", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n 1)"
 	icu_url="https://github.com/unicode-org/icu/releases/download/release-${icu_github_tag}/icu4c-${icu_github_tag/-/_}-src.tgz"
@@ -791,43 +825,69 @@ post_command() {
 # Multi Arch
 #######################################################################################################################################################
 _multi_arch() {
-	if [[ ${qbt_cross_name} =~ ^(aarch64)$ ]]; then
-		echo -e "${tn} ${ugc}${cly} Using Multi Arch: ${qbt_cross_name}${cend}"
-		#
-		qbt_cross_host="${qbt_cross_host:-aarch64-linux-musl}"
-		qbt_cross_openssl="${qbt_cross_openssl:-linux-aarch64}"
-		qbt_cross_boost="${qbt_cross_boost:-arm}"
-		qbt_cross_qtbase="${qbt_cross_qt_xplatform:-linux-aarch64-gnu-g++}"
-		#
-		CHOST="${qbt_cross_host}"
-		CC="${qbt_cross_host}-gcc"
-		AR="${qbt_cross_host}-ar"
-		CXX="${qbt_cross_host}-g++"
-		#
-		mkdir -p "${qbt_install_dir}"
-		#
-		[[ ! -f "${qbt_install_dir}/${qbt_cross_host}-cross.tgz" ]] && curl "https://musl.cc/${qbt_cross_host}-cross.tgz" > "${qbt_install_dir}/${qbt_cross_host}-cross.tgz"
-		tar xf "${qbt_install_dir}/${qbt_cross_host}-cross.tgz" --strip-components=1 -C "${qbt_install_dir}"
-		#
-		multi_iconv=("--host=${qbt_cross_host}") # ${multi_iconv[@]}
-		#
-		multi_icu=("--host=${qbt_cross_host}" "-with-cross-build=${qbt_install_dir}/icu/cross") # ${multi_icu[@]}
-		#
-		multi_openssl=("./Configure" "${qbt_cross_openssl}") # ${multi_openssl[@]}
-		#
-		multi_qtbase=("-xplatform" "${qbt_cross_qtbase}") # ${multi_qtbase[@]}
-		#
-		if [[ "${qbt_build_tool}" = 'cmake' ]]; then
-			multi_libtorrent=("-D CMAKE_CXX_COMPILER=${qbt_cross_host}-g++")  # ${multi_libtorrent[@]}
-			multi_qbittorrent=("-D CMAKE_CXX_COMPILER=${qbt_cross_host}-g++") # ${multi_qbittorrent[@]}
-		else
-			b2_toolset="gcc-arm"
-			echo -e "using gcc : arm : ${qbt_cross_host}-g++ : <cflags>${optimize/*/$optimize }-std=${cxx_standard} <cxxflags>${optimize/*/$optimize }-std=${cxx_standard} ;${tn}using python : ${python_short_version} : /usr/bin/python${python_short_version} : /usr/include/python${python_short_version} : /usr/lib/python${python_short_version} ;" > "$HOME/user-config.jam"
-			multi_libtorrent=("toolset=${b2_toolset}") # ${multi_libtorrent[@]}
+	if [[ "${qbt_cross_name}" =~ ^(armv6|armv7|aarch64)$ ]]; then
+		if [[ "${what_version_codename}" =~ ^(alpine)$ ]]; then
+			echo -e "${tn} ${ugc}${cly} Using Multi Arch: ${qbt_cross_name}${cend}"
 			#
-			multi_qbittorrent=("--host=${qbt_cross_host}") # ${multi_qbittorrent[@]}
+			case "${qbt_cross_name}" in
+				armv6)
+					alpine_arch="armhf"
+					qbt_cross_host="armv6-linux-musleabihf"
+					qbt_cross_openssl="linux-armv4"
+					qbt_cross_boost="arm"
+					qbt_cross_qtbase="linux-arm-gnueabi-g++"
+					;;
+				armv7)
+					alpine_arch="armv7"
+					qbt_cross_host="armv7r-linux-musleabihf"
+					qbt_cross_openssl="linux-armv4"
+					qbt_cross_boost="arm"
+					qbt_cross_qtbase="linux-arm-gnueabi-g++"
+					;;
+				aarch64)
+					alpine_arch="aarch64"
+					qbt_cross_host="aarch64-linux-musl"
+					qbt_cross_openssl="linux-aarch64"
+					qbt_cross_boost="arm"
+					qbt_cross_qtbase="linux-aarch64-gnu-g++"
+					;;
+			esac
+			#
+			CHOST="${qbt_cross_host}"
+			CC="${qbt_cross_host}-gcc"
+			AR="${qbt_cross_host}-ar"
+			CXX="${qbt_cross_host}-g++"
+			#
+			mkdir -p "${qbt_install_dir}"
+			#
+			[[ ! -f "${qbt_install_dir}/${qbt_cross_host}-cross.tgz" ]] && curl "https://musl.cc/${qbt_cross_host}-cross.tgz" > "${qbt_install_dir}/${qbt_cross_host}-cross.tgz"
+			tar xf "${qbt_install_dir}/${qbt_cross_host}-cross.tgz" --strip-components=1 -C "${qbt_install_dir}"
+			#
+			multi_iconv=("--host=${qbt_cross_host}") # ${multi_iconv[@]}
+			#
+			multi_icu=("--host=${qbt_cross_host}" "-with-cross-build=${qbt_install_dir}/icu/cross") # ${multi_icu[@]}
+			#
+			multi_openssl=("./Configure" "${qbt_cross_openssl}") # ${multi_openssl[@]}
+			#
+			multi_qtbase=("-xplatform" "${qbt_cross_qtbase}") # ${multi_qtbase[@]}
+			#
+			if [[ "${qbt_build_tool}" = 'cmake' ]]; then
+				multi_libtorrent=("-D CMAKE_CXX_COMPILER=${qbt_cross_host}-g++")  # ${multi_libtorrent[@]}
+				multi_qbittorrent=("-D CMAKE_CXX_COMPILER=${qbt_cross_host}-g++") # ${multi_qbittorrent[@]}
+			else
+				b2_toolset="gcc-arm"
+				echo -e "using gcc : arm : ${qbt_cross_host}-g++ : <cflags>${optimize/*/$optimize }-std=${cxx_standard} <cxxflags>${optimize/*/$optimize }-std=${cxx_standard} ;${tn}using python : ${python_short_version} : /usr/bin/python${python_short_version} : /usr/include/python${python_short_version} : /usr/lib/python${python_short_version} ;" > "$HOME/user-config.jam"
+				multi_libtorrent=("toolset=${b2_toolset}") # ${multi_libtorrent[@]}
+				#
+				multi_qbittorrent=("--host=${qbt_cross_host}") # ${multi_qbittorrent[@]}
+			fi
+			return
+		else
+			echo
+			echo -e " ${ulrc} Multiarch only works with Alpine Linux (native or docker)${cend}"
+			echo
+			exit 1
 		fi
-		return
 	else
 		multi_openssl=("./config") # ${multi_openssl[@]}
 		return
@@ -864,7 +924,7 @@ _release_info() {
 		OpenSSL: ${openssl_pretty_version}
 		zlib: ${zlib_github_tag#v}
 
-		These builds were created on Alpine linux using musl and [prebuilt toolchains](https://musl.cc/#binaries) for aarch64
+		These builds were created on Alpine linux using musl and [prebuilt toolchains](https://musl.cc/#binaries) for armv6 armv7r aarch64
 	RELEASE_INFO
 	#
 	return
@@ -968,7 +1028,21 @@ while (("${#}")); do
 			shift
 			;;
 		-bs-ma | --boot-strap-multi-arch)
-			qbt_cross_name="aarch64"
+			if [[ -n "${2}" && "${2}" =~ ^(armv6|armv7|aarch64)$ ]]; then
+				qbt_cross_name="${2}"
+				shift 2
+			else
+				echo
+				echo -e " ${ulrc} You must provide a valid arch option when using${cend} ${clb}-ma${cend}"
+				echo
+				echo -e " ${ulyc} armv6${cend}"
+				echo -e " ${ulyc} armv7${cend}"
+				echo -e " ${ulyc} aarch64${cend}"
+				echo
+				echo -e " ${ulgc} example usage:${clb} -ma aarch64${cend}"
+				echo
+				exit 1
+			fi
 			_multi_arch
 			shift
 			;;
@@ -1142,13 +1216,17 @@ while (("${#}")); do
 			echo
 			echo -e " ${ulcc} ${tb}${tu}Here is the help description for this flag:${cend}"
 			echo
-			echo -e " ${urc}${clr} Github action specific. You probably dont need it${cend}"
+			echo -e " ${urc}${clr} Github action and ALpine specific. You probably dont need it${cend}"
 			echo
-			echo -e " This switch bootstraps the musl cross build files needed for ${clb}aarch64${cend}"
+			echo -e " This switch bootstraps the musl cross build files needed for any provided and supported architecture"
 			echo
-			echo -e "${clg} Usage:${cend} ${clc}${qbt_working_dir_short}/$(basename -- "$0")${cend} ${clb}-bs-ma${cend}"
+			echo -e " ${uyc} armv6"
+			echo -e " ${uyc} armv7"
+			echo -e " ${uyc} aarch64"
 			echo
-			echo -e " ${uyc} Set this variable to trigger builing using aarch64-musl: ${clb}export qbt_cross_name=aarch64${cend}"
+			echo -e "${clg} Usage:${cend} ${clc}${qbt_working_dir_short}/$(basename -- "$0")${cend} ${clb}-bs-ma ${qbt_cross_name:-aarch64}${cend}"
+			echo
+			echo -e " ${uyc} You can also set it as a variable to trigger cross building: ${clb}export qbt_cross_name=${qbt_cross_name:-aarch64}${cend}"
 			echo
 			exit
 			;;
@@ -1156,7 +1234,7 @@ while (("${#}")); do
 			echo
 			echo -e " ${ulcc} ${tb}${tu}Here is the help description for this flag:${cend}"
 			echo
-			echo -e "${clr} Github action specific. You probably dont need it${cend}"
+			echo -e " ${urc}${clr} Github action specific and Apine only. You probably dont need it${cend}"
 			echo
 			echo -e " Performs all bootstrapping options"
 			echo
@@ -1229,6 +1307,24 @@ while (("${#}")); do
 			echo -e " ${td}This flag is provided with no arguments.${cend}"
 			echo
 			echo -e " ${clb}-lm${cend}"
+			echo
+			exit
+			;;
+		-h-ma | --help-multi-arch)
+			echo
+			echo -e " ${ulcc} ${tb}${tu}Here is the help description for this flag:${cend}"
+			echo
+			echo -e " ${urc}${clr} Github action and ALpine specific. You probably dont need it${cend}"
+			echo
+			echo -e " This switch will make the script use the cross build configuration for these supported architectures"
+			echo
+			echo -e " ${uyc} armv6"
+			echo -e " ${uyc} armv7"
+			echo -e " ${uyc} aarch64"
+			echo
+			echo -e "${clg} Usage:${cend} ${clc}${qbt_working_dir_short}/$(basename -- "$0")${cend} ${clb}-bs-ma ${qbt_cross_name:-aarch64}${cend}"
+			echo
+			echo -e " ${uyc} You can also set it as a variable to trigger cross building: ${clb}export qbt_cross_name=${qbt_cross_name:-aarch64}${cend}"
 			echo
 			exit
 			;;
@@ -1496,7 +1592,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' || "${1}" = "${app_name}" ]]; then
 	custom_flags_reset
 	download_file "${app_name}" "${!app_url}" "/source"
 	#
-	if [[ "${qbt_cross_name}" =~ ^(aarch64)$ ]]; then
+	if [[ "${qbt_cross_name}" =~ ^(armv6|armv7|aarch64)$ ]]; then
 		mkdir -p "${qbt_install_dir}/${app_name}/cross"
 		_cd "${qbt_install_dir}/${app_name}/cross"
 		"${qbt_install_dir}/${app_name}/source/runConfigureICU" Linux/gcc
@@ -1657,7 +1753,14 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 	custom_flags_set
 	download_folder "${app_name}" "${!app_github_url}"
 	#
-	[[ "${qbt_cross_name}" =~ ^(aarch64)$ ]] && sed 's|aarch64-linux-gnu|aarch64-linux-musl|g' -i "${qbt_install_dir}/qtbase/mkspecs/linux-aarch64-gnu-g++/qmake.conf"
+	case "${qbt_cross_name}" in
+		armv6 | armv7)
+			sed "s|arm-linux-gnueabi|${qbt_cross_host}|g" -i "${qbt_install_dir}/qtbase/mkspecs/linux-arm-gnueabi-g++/qmake.conf"
+			;;
+		aarch64)
+			sed "s|aarch64-linux-gnu|${qbt_cross_host}|g" -i "${qbt_install_dir}/qtbase/mkspecs/linux-aarch64-gnu-g++/qmake.conf"
+			;;
+	esac
 	#
 	if [[ "${qbt_build_tool}" == 'cmake' && "${qt_version}" =~ ^(6\.[0-9])$ ]]; then
 		mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
