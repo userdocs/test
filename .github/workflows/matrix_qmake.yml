@@ -33,7 +33,7 @@ jobs:
           - icu_step_name: icu skipped
             icu_matrix_name: "-"
 
-    name: "${{ matrix.arch_type }}${{ matrix.icu_matrix_name }}${{ libtorrent_matrix_name }}"
+    name: "${{ matrix.arch_type }}${{ matrix.icu_matrix_name }}${{ matrix.libtorrent_matrix_name }}"
     env:
       build_dir: "qbt-build"
       qbt_build_tool: ""
