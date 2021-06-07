@@ -927,18 +927,14 @@ _release_info() {
 		|   aarch64   |   aarch64-linux-musl-cross    |
 		|   x86_64    |      None - native build      |
 
-		### Using this build matrix
+		### Using this build matrix for libtorrent v${libtorrent_github_tag}
 
-		|  Alpine Arch  | qmake | cmake | iconv |  icu | libtorrent v1 | libtorrent v2 |
-		| :-----------: | :-----: | :----: | :----: | :---: | :------------: | :------------: |
-		| All supported |   ✅   |   ❌   |   ✅   |    ❌ |       ✅       |       ❌       |
-		| All supported |   ✅   |   ❌   |   ✅   |    ✅ |       ✅       |       ❌       |
-		| All supported |   ✅   |   ❌   |   ✅   |    ❌ |       ❌       |       ✅       |
-		| All supported |   ✅   |   ❌   |   ✅   |    ✅ |       ❌       |       ✅       |
-		| All supported |   ❌   |   ✅   |   ✅   |    ❌ |       ✅       |       ❌       |
-		| All supported |   ❌   |   ✅   |   ✅   |    ✅ |       ✅       |       ❌       |
-		| All supported |   ❌   |   ✅   |   ✅   |    ❌ |       ❌       |       ✅       |
-		| All supported |   ❌   |   ✅   |   ✅   |    ✅ |       ❌       |       ✅       |
+		|  Alpine Arch  | qmake | cmake | iconv |  icu  | libtorrent ${libtorrent_github_tag} |
+		| :-----------: | :---: | :---: | :---: | :---: | :------------------------------------: |
+		| All supported |   ✅   |   ❌   |   ✅   |   ❌   |                   ✅                    |
+		| All supported |   ✅   |   ❌   |   ✅   |   ✅   |                   ✅                    |
+		| All supported |   ❌   |   ✅   |   ✅   |   ❌   |                   ✅                    |
+		| All supported |   ❌   |   ✅   |   ✅   |   ✅   |                   ✅                    |
 		        
 	RELEASE_INFO
 	#
