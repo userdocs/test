@@ -1,5 +1,5 @@
 # @credits https://github.com/c0re100/qBittorrent-Enhanced-Edition/blob/v4_3_x/.github/workflows/build_and_release.yml
-name: qbittorrent-nox qmake multi build
+name: qbittorrent-nox cmake and qmake multi build
 on:
   workflow_dispatch:
 jobs:
@@ -16,27 +16,23 @@ jobs:
         arch_type: [x86_64, armv6, armv7, aarch64]
         libtorrent_version: ["1.2", "2.0"]
         icu_step_name: [icu skipped, icu]
+        build_tool: [qmake, cmake]
         include:
           - libtorrent_version: "2.0"
             preview_release: true
-            libtorrent_matrix_name: lt-v2.0
 
           - libtorrent_version: "1.2"
             preview_release: false
-            libtorrent_matrix_name: lt-v1.2
 
           - icu_step_name: icu
-            icu_matrix_name: -icu-
+            icu_matrix_name: icu-
             qt_with_icu: -i
             with_icu: bash qbittorrent-nox-static.sh icu
 
-          - icu_step_name: icu skipped
-            icu_matrix_name: "-"
-
-    name: "${{ matrix.arch_type }}${{ matrix.icu_matrix_name }}${{ matrix.libtorrent_matrix_name }}"
+    name: "${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}libtorrent-v${{ matrix.libtorrent_version }}"
     env:
       build_dir: "qbt-build"
-      qbt_build_tool: ""
+      qbt_build_tool: "${{ matrix.build_tool }}"
       qbt_cross_name: "${{ matrix.arch_type }}"
       libtorrent_version: "${{ matrix.libtorrent_version }}"
     steps:
@@ -83,18 +79,29 @@ jobs:
 
       - name: qbittorrent
         run: bash qbittorrent-nox-static.sh qbittorrent
-      #
+
       - name: "Set release asset name"
-        run: mv -f "${{ env.build_dir }}/completed/qbittorrent-nox" "${{ env.build_dir }}/completed/qbittorrent-nox${{ matrix.icu_matrix_name }}${{ matrix.arch_type }}"
-      #
+        run: mv -f "${{ env.build_dir }}/completed/qbittorrent-nox" "${{ env.build_dir }}/completed/${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}qbittorrent-nox"
+
+      - name: "Set artifact asset name"
+        if: matrix.build_tool == cmake
+        run: mv -f "${{ env.build_dir }}/completed/qbittorrent_graph.png" "${{ env.build_dir }}/completed/${{ matrix.name }}-qbittorrent-graph.png"
+
       - name: "Create release - tag - assets"
         uses: ncipollo/release-action@v1.8.6
         with:
           prerelease: ${{ matrix.preview_release }}
-          artifacts: "${{ env.build_dir }}/completed/qbittorrent-nox${{ matrix.icu_matrix_name }}${{ matrix.arch_type }}"
+          artifacts: "${{ env.build_dir }}/completed/${{ matrix.arch_type }}-${{ matrix.build_tool }}-${{ matrix.icu_matrix_name }}qbittorrent-nox"
           replacesArtifacts: true
           tag: "${{ env.release_tag }}"
           name: "${{ env.release_title }}"
           bodyFile: "${{ env.build_dir }}/release_info/release.md"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Archive code coverage results
+        if: matrix.build_tool == cmake
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: ${{ matrix.name }}-qbittorrent-graph.png"
+          path: ${{ env.build_dir }}/completed/qbittorrent_graph.png
