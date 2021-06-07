@@ -1718,7 +1718,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		#
 		if [[ "${qbt_build_tool}" == 'cmake' ]]; then
 			mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
-			cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${libtorrent_github_tag}/dep_graph.dot" -G Ninja -B build \
+			cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${libtorrent_github_tag}/dep-graph.dot" -G Ninja -B build \
 				"${multi_libtorrent[@]}" \
 				-D CMAKE_BUILD_TYPE="Release" \
 				-D CMAKE_CXX_STANDARD="${standard}" \
@@ -1733,7 +1733,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			#
 			cmake --install build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 			#
-			dot -Tpng -o "${qbt_install_dir}/completed/${app_name}_graph.png" "${qbt_install_dir}/graphs/${libtorrent_github_tag}/dep_graph.dot"
+			dot -Tpng -o "${qbt_install_dir}/completed/${app_name}-graph.png" "${qbt_install_dir}/graphs/${libtorrent_github_tag}/dep-graph.dot"
 			#
 		else
 			[[ ${qbt_cross_name} =~ ^(armhf|armv7)$ ]] && arm_libatomic="-l:libatomic.a"
@@ -1741,7 +1741,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			if [[ "${libtorrent_github_tag}" =~ ^(RC_2|v2\.0\..*) ]]; then
 				lt_version_options=()
 				libtorrent_libs="-l:libboost_system.a -l:libtorrent-rasterbar.a -l:libtry_signal.a ${arm_libatomic}"
-				lt_cmake_flags="-DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_NO_DEPRECATED -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO -DTORRENT_SSL_PEERS -DOPENSSL_NO_SSL2"
+				lt_cmake_flags="-fexceptions -DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_NO_DEPRECATED -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO -DTORRENT_SSL_PEERS -DOPENSSL_NO_SSL2"
 			else
 				lt_version_options=("iconv=on")
 				libtorrent_libs="-l:libboost_system.a -l:libtorrent-rasterbar.a ${arm_libatomic} -l:libiconv.a"
@@ -1796,7 +1796,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 	#
 	if [[ "${qbt_build_tool}" == 'cmake' && "${qt_version}" =~ ^(6\.[0-9])$ ]]; then
 		mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
-		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qtbase_github_tag}/dep_graph.dot" -G Ninja -B build \
+		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qtbase_github_tag}/dep-graph.dot" -G Ninja -B build \
 			"${multi_libtorrent[@]}" \
 			-D CMAKE_BUILD_TYPE="release" \
 			-D QT_FEATURE_optimize_full=on -D QT_FEATURE_static=on -D QT_FEATURE_shared=off \
@@ -1816,7 +1816,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		#
 		cmake --install build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 		#
-		dot -Tpng -o "${qbt_install_dir}/completed/${app_name}_graph.png" "${qbt_install_dir}/graphs/${qtbase_github_tag}/dep_graph.dot"
+		dot -Tpng -o "${qbt_install_dir}/completed/${app_name}-graph.png" "${qbt_install_dir}/graphs/${qtbase_github_tag}/dep-graph.dot"
 	elif [[ "${qt_version}" =~ ^(5\.[0-9]{1,2})$ ]]; then
 		if [[ "${qbt_skip_icu}" = 'no' ]]; then
 			icu=("-icu" "-no-iconv" "QMAKE_CXXFLAGS=-w")
