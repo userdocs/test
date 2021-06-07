@@ -104,7 +104,5 @@ jobs:
         if: env.qbt_build_tool == 'cmake'
         uses: actions/upload-artifact@v2.2.3
         with:
-          name: ${{ env.name }}-qbittorrent-graph.png
-          path: |
-            ${{ env.build_dir }}/completed/libtorrent-graph.png
-            ${{ env.build_dir }}/completed/qbittorrent-graph.png
+          name: ${{ env.name }}-graphs
+          path: ${{ env.build_dir }}/completed/*.png
