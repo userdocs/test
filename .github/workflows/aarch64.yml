@@ -20,6 +20,7 @@ jobs:
         include:
           - build_tool: cmake
             build_tool_name: cmake-
+
           - with_icu: "-i"
             with_icu_name: icu-
             with_icu_command: bash qbittorrent-nox-static.sh icu
@@ -33,7 +34,7 @@ jobs:
       - run: apk add bash
         shell: ash {0}
 
-      - run: bash qbittorrent-nox-static.sh -bs-ma
+      - run: bash qbittorrent-nox-static.sh -bs-ma ${{ matrix.arch_type }}
 
       - run: bash qbittorrent-nox-static.sh libexecinfo
 
