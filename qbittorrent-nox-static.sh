@@ -621,12 +621,12 @@ apply_patches() {
 		[[ ! -d "${patch_dir}" ]] && mkdir -p "${patch_dir}"
 		#
 		if [[ -f "${patch_file}" ]]; then
-			[[ "${patch_app_name}" == 'libtorrent' ]] && echo # purely comsetic
+			echo
 			echo -e " ${utick} ${cr}Using ${!patch_tag} existing patch file${cend}"
 			[[ "${patch_app_name}" == 'qbittorrent' ]] && echo # purely comsetic
 		else
 			if curl_curl "${patch_file_url}" -o "${patch_file}"; then
-				[[ "${patch_app_name}" == 'libtorrent' ]] && echo # purely comsetic
+				echo
 				echo -e " ${utick} ${cr}Using ${!patch_tag} downloaded patch file${cend}"
 				[[ "${patch_app_name}" == 'qbittorrent' ]] && echo # purely comsetic
 			fi
