@@ -41,7 +41,11 @@ jobs:
       - run: apk add bash
         shell: ash {0}
 
-      - run: bash qbittorrent-nox-static.sh -bs-ma ${{ matrix.arch_type }}
+      - if: ${{ matrix.arch_type == 'x86_64' }}
+        run: bash qbittorrent-nox-static.sh
+
+      - if: ${{ ! matrix.arch_type == 'x86_64' }}
+        run: bash qbittorrent-nox-static.sh -bs-ma ${{ matrix.arch_type }}
 
       - run: bash qbittorrent-nox-static.sh libexecinfo
 
