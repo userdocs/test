@@ -91,7 +91,7 @@ set_default_values() {
 	#
 	libtorrent_version="${libtorrent_version:-1.2}" # Set this here so it is easy to see and change
 	#
-	qt_version=${qt_version:-5.15} # Set this here so it is easy to see and change. PATCH versions are detected automatically - 5.15.2 will be used over 5.15.0
+	qbt_qt_version=${qbt_qt_version:-5.15} # Set this here so it is easy to see and change. PATCH versions are detected automatically - 5.15.2 will be used over 5.15.0
 	#
 	qbt_python_version="3" # We are only using python3 but it's easier to just change this if we need to.
 	#
@@ -486,10 +486,10 @@ set_module_urls() {
 	#
 	qt_github_tag_list="$(git_git ls-remote -q -t --refs https://github.com/qt/qtbase.git | awk '{sub("refs/tags/", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV)"
 	#
-	qtbase_github_tag="$(grep -Eom1 "v${qt_version}.([0-9]{1,2})" <<< "${qt_github_tag_list}")"
+	qtbase_github_tag="$(grep -Eom1 "v${qbt_qt_version}.([0-9]{1,2})" <<< "${qt_github_tag_list}")"
 	qtbase_github_url="https://github.com/qt/qtbase.git"
 	#
-	qttools_github_tag="$(grep -Eom1 "v${qt_version}.([0-9]{1,2})" <<< "${qt_github_tag_list}")"
+	qttools_github_tag="$(grep -Eom1 "v${qbt_qt_version}.([0-9]{1,2})" <<< "${qt_github_tag_list}")"
 	qttools_github_url="https://github.com/qt/qttools.git"
 	#
 	libtorrent_github_url="https://github.com/arvidn/libtorrent.git"
@@ -1745,11 +1745,11 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			if [[ "${libtorrent_github_tag}" =~ ^(RC_2|v2\.0\..*) ]]; then
 				lt_version_options=()
 				libtorrent_libs="-l:libboost_system.a -l:libtorrent-rasterbar.a -l:libtry_signal.a ${arm_libatomic}"
-				lt_cmake_flags="-fexceptions -DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_NO_DEPRECATED -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO -DTORRENT_SSL_PEERS -DOPENSSL_NO_SSL2"
+                lt_cmake_flags="-DTORRENT_USE_LIBCRYPTO -DTORRENT_USE_OPENSSL -DTORRENT_USE_I2P=1 -DTORRENT_SSL_PEERS -DBOOST_ALL_NO_LIB -DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_HAS_STD_CHRONO -DBOOST_ASIO_NO_DEPRECATED -DBOOST_MULTI_INDEX_DISABLE_SERIALIZATION -DBOOST_SYSTEM_NO_DEPRECATED -DBOOST_SYSTEM_STATIC_LINK=1"
 			else
 				lt_version_options=("iconv=on")
 				libtorrent_libs="-l:libboost_system.a -l:libtorrent-rasterbar.a ${arm_libatomic} -l:libiconv.a"
-				lt_cmake_flags="-fexceptions -DBOOST_ASIO_ENABLE_CANCELIO -DTORRENT_USE_ICONV -DTORRENT_USE_OPENSSL -DTORRENT_USE_LIBCRYPTO"
+				lt_cmake_flags="-DTORRENT_USE_ICONV=1 -DTORRENT_USE_LIBCRYPTO -DTORRENT_USE_OPENSSL -DTORRENT_USE_I2P=1 -DTORRENT_SSL_PEERS -DBOOST_ALL_NO_LIB -DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_HAS_STD_CHRONO -DBOOST_ASIO_NO_DEPRECATED -DBOOST_MULTI_INDEX_DISABLE_SERIALIZATION -DBOOST_SYSTEM_NO_DEPRECATED -DBOOST_SYSTEM_STATIC_LINK=1"
 			fi
 			#
 			"${qbt_install_dir}/boost/b2" "${multi_libtorrent[@]}" -j"$(nproc)" "${lt_version_options[@]}" address-model="$(getconf LONG_BIT)" "${lt_debug}" optimization=speed cxxstd="${standard}" dht=on encryption=on crypto=openssl i2p=on extensions=on variant=release threading=multi link=static boost-link=static cxxflags="${CXXFLAGS}" cflags="${CPPFLAGS}" linkflags="${LDFLAGS}" install --prefix="${qbt_install_dir}" |& tee "${qbt_install_dir}/logs/${app_name}.log.txt"
@@ -1798,7 +1798,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 			;;
 	esac
 	#
-	if [[ "${qbt_build_tool}" == 'cmake' && "${qt_version}" =~ ^(6\.[0-9])$ ]]; then
+	if [[ "${qbt_build_tool}" == 'cmake' && "${qbt_qt_version}" =~ ^(6\.[0-9])$ ]]; then
 		mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
 		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qtbase_github_tag}/dep-graph.dot" -G Ninja -B build \
 			"${multi_libtorrent[@]}" \
@@ -1821,7 +1821,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		cmake --install build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 		#
 		dot -Tpng -o "${qbt_install_dir}/completed/${app_name}-graph.png" "${qbt_install_dir}/graphs/${qtbase_github_tag}/dep-graph.dot"
-	elif [[ "${qt_version}" =~ ^(5\.[0-9]{1,2})$ ]]; then
+	elif [[ "${qbt_qt_version}" =~ ^(5\.[0-9]{1,2})$ ]]; then
 		if [[ "${qbt_skip_icu}" = 'no' ]]; then
 			icu=("-icu" "-no-iconv" "QMAKE_CXXFLAGS=-w")
 		else
@@ -1861,7 +1861,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 	custom_flags_set
 	download_folder "${app_name}" "${!app_github_url}"
 	#
-	if [[ "${qbt_build_tool}" == 'cmake' && "${qt_version}" =~ ^(6\.[0-9])$ ]]; then
+	if [[ "${qbt_build_tool}" == 'cmake' && "${qbt_qt_version}" =~ ^(6\.[0-9])$ ]]; then
 		mkdir -p "${qbt_install_dir}/graphs/${libtorrent_github_tag}"
 		cmake -Wno-dev -Wno-deprecated --graphviz="${qbt_install_dir}/graphs/${qtbase_github_tag}/dep-graph.dot" -G Ninja -B build \
 			"${multi_libtorrent[@]}" \
@@ -1880,7 +1880,7 @@ if [[ "${!app_name_skip:-yes}" = 'no' ]] || [[ "${1}" = "${app_name}" ]]; then
 		cmake --install build |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
 		#
 		dot -Tpng -o "${qbt_install_dir}/completed/${app_name}-graph.png" "${qbt_install_dir}/graphs/${qtbase_github_tag}/dep-graph.dot"
-	elif [[ "${qt_version}" =~ ^(5\.[0-9]{1,2})$ ]]; then
+	elif [[ "${qbt_qt_version}" =~ ^(5\.[0-9]{1,2})$ ]]; then
 		"${qbt_install_dir}/bin/qmake" -set prefix "${qbt_install_dir}" |& tee "${qbt_install_dir}/logs/${app_name}.log.txt"
 		#
 		"${qbt_install_dir}/bin/qmake" QMAKE_CXXFLAGS="-static" QMAKE_LFLAGS="-static" |& tee -a "${qbt_install_dir}/logs/${app_name}.log.txt"
