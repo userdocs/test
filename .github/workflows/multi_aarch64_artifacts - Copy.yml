@@ -34,7 +34,7 @@ jobs:
     env:
       qbt_build_tool: ${{ matrix.build_tool }}
       qbt_cross_name: ${{ matrix.arch_type }}
-      test: ${{ github.job }}
+      test: ${{ github.job.name }}
 
     steps:
       - uses: actions/checkout@v2.3.4
