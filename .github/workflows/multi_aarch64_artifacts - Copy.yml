@@ -34,7 +34,7 @@ jobs:
     env:
       qbt_build_tool: ${{ matrix.build_tool }}
       qbt_cross_name: ${{ matrix.arch_type }}
-      test: ${{ GITHUB_JOB }}
+      test: ${{ github.job }}
 
     steps:
       - uses: actions/checkout@v2.3.4
@@ -42,4 +42,4 @@ jobs:
       - run: apk add bash
         shell: ash {0}
 
-      - run: echo ${{ jobs.build.name }}
+      - run: echo ${{ github.job }}
