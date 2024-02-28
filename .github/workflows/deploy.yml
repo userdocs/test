@@ -1,0 +1,16 @@
+name: test stuff
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: check stuff
+        run: |
+          local_var=$(gh api repos/rust-lang/mdBook/releases/latest --jq='.tag_name')
+
+          printf '%s' "local_var: $local_var"
