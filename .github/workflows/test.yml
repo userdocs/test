@@ -3,6 +3,10 @@ name: a test
 on:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-1:
     runs-on: ${{ matrix.runs-on }}
