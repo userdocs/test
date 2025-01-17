@@ -53,7 +53,7 @@ jobs:
           persist-credentials: false
 
       - name: Host - Create docker crossbuild container
-        run: docker run --name runners -it -d ${{ github.workspace }}:/root ${{ matrix.test }}:edge
+        run: docker run --name runners -it -d -v ${{ github.workspace }}:/root ${{ matrix.test }}:edge
 
       - name: Docker -a test
         run: docker exec runners apk --print-arch
