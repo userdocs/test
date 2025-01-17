@@ -6,11 +6,16 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.runs-on }}
-    container: alpine:edge
+    container: ${{ matrix.test }}
     strategy:
       fail-fast: false
       matrix:
         runs-on: ["ubuntu-24.04", "ubuntu-24.04-arm"]
+        include:
+          - runs-on: "ubuntu-24.04"
+            test: "amd64/alpine"
+          - runs-on: "ubuntu-24.04"
+            test: "arm64v8/alpine"
 
     steps:
       - uses: actions/checkout@v4
