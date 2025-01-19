@@ -1,0 +1,15 @@
+name: reusable child
+
+on:
+  workflow_call:
+
+jobs:
+  zizmor-child:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: a command
+        run: echo "Hello, world!"

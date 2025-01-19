@@ -1,0 +1,10 @@
+name: reusable parent
+
+on:
+  workflow_dispatch:
+
+jobs:
+  reusable-parent:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/zizmor-child.yml
