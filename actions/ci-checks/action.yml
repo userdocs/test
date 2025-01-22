@@ -1,9 +1,6 @@
 name: ci auto rerun failed jobs
 description: ci auto rerun failed jobs
-inputs:
-  run_id:
-    description: "The run id of the workflow to rerun"
-    required: true
+
 runs:
   using: "composite"
   steps:
