@@ -3,10 +3,6 @@ name: a test 2
 on:
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build-1:
     runs-on: ${{ matrix.runs-on }}
@@ -24,4 +20,4 @@ jobs:
           persist-credentials: false
 
       - name: a test
-        run: apk --print-arch
+        run: bash test.sh
