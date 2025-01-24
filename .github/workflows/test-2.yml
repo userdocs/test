@@ -25,3 +25,6 @@ jobs:
 
       - name: a test
         run: env
+
+      - name: a test
+        run: bash test.sh
