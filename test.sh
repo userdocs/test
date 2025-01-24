@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 if [[ -n "${GITHUB_REPOSITORY}" ]]; then echo "#################### yes"; fi
 
