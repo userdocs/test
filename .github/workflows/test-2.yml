@@ -46,7 +46,7 @@ jobs:
         run: |
           # We create an Alpine edge container for cross-compilation with a user named gh which has same id as runner 1001 and provide sudo access
           # This way we can run commands as a non-root user, avoiding permission issues on host runner. Switching between user and root as needed.
-          docker run --name ${container_name} -it -d -w /home/gh  -v ${{ github.workspace }}:/home/gh  ${{ matrix.os_id }}:${{ matrix.os_version_id }}
+          docker run --name ${container_name} -it -d -w /home/gh -v ${{ github.workspace }}:/home/gh ${{ matrix.os_id }}:${{ matrix.os_version_id }}
           # Create the user gh with the id 1001:1001 which is the same as the runner user id and group id.
           docker exec ${container_name} sh -c 'adduser -h /home/gh -Ds /bin/bash -u 1001 gh && apk add sudo'
           # Allow the user gh to run sudo without password prompt: docker exec -u gh:gh ${container_name} sudo ls
