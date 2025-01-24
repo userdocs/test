@@ -3,16 +3,9 @@ name: a test 2
 on:
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  build-1:
+  build:
     runs-on: ${{ matrix.runs-on }}
-    container: alpine:edge
-    permissions:
-      contents: read
     strategy:
       fail-fast: false
       matrix:
