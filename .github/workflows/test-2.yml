@@ -38,9 +38,22 @@ jobs:
       container_name: "multiarch"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout ${{ inputs.distinct_id }}
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Host - phased updates ${{ inputs.distinct_id }}
+        run: printf '%s\n' 'APT::Get::Always-Include-Phased-Updates "false";' | sudo tee /etc/apt/apt.conf.d/99-phased-updates
+
+      - name: Host - update ${{ inputs.distinct_id }}
+        run: sudo apt-get update
+
+      # - name: Host - upgrade ${{ inputs.distinct_id }}
+      #   run: sudo apt-get -y upgrade
+
+      - name: Host - set up qemu-user-static binfmt-support ${{ inputs.distinct_id }}
+        run: sudo apt install libpipeline1 qemu-user-static binfmt-support
 
       - name: Host - Create docker ${{ env.multiarch }} container ${{ inputs.distinct_id }}
         run: |
