@@ -35,7 +35,7 @@ jobs:
         runs-on: ["ubuntu-24.04", "ubuntu-24.04-arm"]
 
     env:
-      container_name: multiarch
+      container_name: "multiarch"
 
     steps:
       - uses: actions/checkout@v4
