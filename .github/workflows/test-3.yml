@@ -1,0 +1,24 @@
+name: a test 2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-1:
+    runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: ["ubuntu-24.04", "ubuntu-24.04-arm"]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Automated Change
+          file_pattern: "tesh.sh"
