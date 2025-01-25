@@ -18,7 +18,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: change file
+        run: echo $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 10) > file.txt
+
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Automated Change
-          file_pattern: "tesh.sh"
+          file_pattern: "file.txt"
