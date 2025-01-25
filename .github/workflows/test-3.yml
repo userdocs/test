@@ -11,18 +11,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: ["ubuntu-24.04", "ubuntu-24.04-arm"]
+        runs-on: ["ubuntu-24.04-arm"]
 
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: true
-          ref: ${{ github.head_ref }}
+          persist-credentials: false
 
       - name: change file
         run: echo $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 10) > file.txt
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Automated Change
-          file_pattern: "file.txt"
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit Changes
+        run: |
+          git add file.txt
+          git commit -m "Automated commit by GitHub Actions"
+          git push
