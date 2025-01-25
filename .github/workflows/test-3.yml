@@ -27,8 +27,9 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Commit Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git add file.txt
           git commit -m "Automated commit by GitHub Actions"
-          git push
-          git -c http.extraheader="Authorization: Bearer ${{ github.token }}" push origin main
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
