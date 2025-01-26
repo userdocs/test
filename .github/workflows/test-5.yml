@@ -1,0 +1,60 @@
+name: a test 5
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-1:
+    runs-on: ubuntu-24.04-arm
+    container: ubuntu:latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        with_cmake_env: ["with-cmake-env", "without-cmake-env"]
+        patch_test: ["patched", "unpatched"]
+    defaults:
+      run:
+        shell: bash
+
+    name: Libtorrent ${{ matrix.patch_test }} ${{ matrix.with_cmake_env }}
+
+    steps:
+      - name: apt update
+        run: apt update
+
+      - name: install dependencies
+        run: apt install -y build-essential libtool perl cmake re2c curl ninja-build pkg-config texinfo unzip git libssl-dev zlib1g-dev libboost-system-dev
+
+      - name: git clone libtorrent
+        run: git clone --no-tags --single-branch --branch RC_2_0 --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "https://github.com/arvidn/libtorrent.git" "libtorrent"
+
+      - name: libtorrent cmake build
+        working-directory: ${{ github.workspace }}/libtorrent
+        run: |
+
+          printf '%s\n\n' "Checking if we should apply patch"
+
+          if [[ ${{ matrix.patch_test }} == "patched" ]]; then
+            curl -sL -o pr-7822.patch https://patch-diff.githubusercontent.com/raw/arvidn/libtorrent/pull/7822.patch
+            git apply pr-7822.patch || printf '%s\n' "Failed to apply patch"
+          fi
+
+          if [[ ${{ matrix.with_cmake_env }} == "without-cmake-env" ]]; then
+            cmake -G Ninja -B build
+          else
+            cmake -G Ninja -B build -D CMAKE_INSTALL_PREFIX=${{ github.workspace }}/libtorrent
+          fi
+
+          cmake --build build
+
+      - name: libtorrent cmake install
+        working-directory: ${{ github.workspace }}/libtorrent
+        run: |
+          cmake --install build --prefix=${{ github.workspace }}/libtorrent
+
+      - name: test
+        run: |
+          ls -la ${{ github.workspace }}/libtorrent/lib/pkgconfig
+          [[ -f ${{ github.workspace }}/libtorrent/lib/pkgconfig/libtorrent-rasterbar.pc ]] && cat ${{ github.workspace }}/libtorrent/lib/pkgconfig/libtorrent-rasterbar.pc || printf '%s\n' "libtorrent-rasterbar.pc not found"
