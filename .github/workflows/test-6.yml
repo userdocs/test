@@ -15,6 +15,8 @@ jobs:
         versions: ["", "1.78.0", "1.84.0"]
 
     steps:
+      - run: apt update && apt install -y git curl
+
       - uses: userdocs/actions/boost@main
         with:
           boost_version: ${{ matrix.versions }}
