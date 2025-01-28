@@ -9,8 +9,13 @@ jobs:
     container: ubuntu:latest
     permissions:
       contents: read
+    strategy:
+      matrix:
+        downloads: ["true", "false"]
+        versions: ["", "1.78.0", "1.84.0"]
 
     steps:
       - uses: userdocs/actions/boost@main
         with:
-          boost_version: ""
+          boost_version: ${{ matrix.versions }}
+          download_archive: ${{ matrix.downloads }}
