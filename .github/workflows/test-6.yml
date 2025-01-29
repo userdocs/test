@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: read
     strategy:
+      fail-fast: false
       matrix:
         downloads: ["true", "false"]
         versions: ["", "1.78.0", "1.84.0"]
