@@ -30,14 +30,25 @@ jobs:
           ls -la
 
       - run: |
-          echo ${{ steps.boost_version_info.outputs.BOOST_WORKING_DIR }}
-          echo ${{ steps.boost_version_info.outputs.BOOST_VERSION }}
-          echo ${{ steps.boost_version_info.outputs.BOOST_MAJOR_VERSION }}
-          echo ${{ steps.boost_version_info.outputs.BOOST_MINOR_VERSION }}
-          echo ${{ steps.boost_version_info.outputs.BOOST_PATCH_VERSION }}
+          echo ${BOOST_WORKING_DIR}
+          echo ${BOOST_VERSION}
+          echo ${BOOST_MAJOR_VERSION}
+          echo ${BOOST_MINOR_VERSION}
+          echo ${BOOST_PATCH_VERSION}
 
-          echo ${{ steps.boost_version_info.outputs.BOOST_URL }}
-          echo ${{ steps.boost_version_info.outputs.BOOST_ARCHIVE_NAME }}
-          echo ${{ steps.boost_version_info.outputs.BOOST_FOLDER_NAME }}
-          echo ${{ steps.boost_version_info.outputs.BOOST_ARCHIVE_SHA1SUM }}
-          echo ${{ steps.boost_version_info.outputs.BOOST_ARCHIVE_SHA256SUM }}
+          echo ${BOOST_URL}
+          echo ${BOOST_ARCHIVE_NAME}
+          echo ${BOOST_FOLDER_NAME}
+          echo ${BOOST_ARCHIVE_SHA1SUM}
+          echo ${BOOST_ARCHIVE_SHA256SUM}
+        env:
+          BOOST_WORKING_DIR: ${{ steps.boost_version_info.outputs.BOOST_WORKING_DIR }}
+          BOOST_VERSION: ${{ steps.boost_version_info.outputs.BOOST_VERSION }}
+          BOOST_MAJOR_VERSION: ${{ steps.boost_version_info.outputs.BOOST_MAJOR_VERSION }}
+          BOOST_MINOR_VERSION: ${{ steps.boost_version_info.outputs.BOOST_MINOR_VERSION }}
+          BOOST_PATCH_VERSION: ${{ steps.boost_version_info.outputs.BOOST_PATCH_VERSION }}
+          BOOST_URL: ${{ steps.boost_version_info.outputs.BOOST_URL }}
+          BOOST_ARCHIVE_NAME: ${{ steps.boost_version_info.outputs.BOOST_ARCHIVE_NAME }}
+          BOOST_FOLDER_NAME: ${{ steps.boost_version_info.outputs.BOOST_FOLDER_NAME }}
+          BOOST_ARCHIVE_SHA1SUM: ${{ steps.boost_version_info.outputs.BOOST_ARCHIVE_SHA1SUM }}
+          BOOST_ARCHIVE_SHA256SUM: ${{ steps.boost_version_info.outputs.BOOST_ARCHIVE_SHA256SUM }}
