@@ -8,12 +8,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        exclude_dir: ["", "ninja/src/third_party/*"]
-
-    name: codepspell ninja
+    name: codepspell ninja with skip dir
 
     steps:
       - uses: actions/checkout@v4
@@ -26,12 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        exclude_dir: ["", "ninja/src/third_party/*"]
-
-    name: codepspell ninja
+    name: codepspell ninja without skip dir
 
     steps:
       - uses: actions/checkout@v4
