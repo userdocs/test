@@ -13,11 +13,11 @@ jobs:
       matrix:
         exclude_dir: ["", "ninja/src/third_party/*"]
 
-    name: Libtorrent ${{ matrix.patch_test }} ${{ matrix.with_cmake_env }}
+    name: codepspell ninja
 
     steps:
       - uses: actions/checkout@v4
       - uses: codespell-project/actions-codespell@v2
         with:
-          skip: ${{ matrix.exclude_dir }}
+          skip: ninja/src/third_party/*
           ignore_words_list: fo,wee,addin,notin
