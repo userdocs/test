@@ -21,3 +21,20 @@ jobs:
         with:
           skip: ninja/src/third_party/*
           ignore_words_list: fo,wee,addin,notin
+
+  build-2:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        exclude_dir: ["", "ninja/src/third_party/*"]
+
+    name: codepspell ninja
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          ignore_words_list: fo,wee,addin,notin
