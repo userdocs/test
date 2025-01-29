@@ -20,7 +20,7 @@ jobs:
         with:
           boost_version: ${{ matrix.versions }}
           download_archive: ${{ matrix.downloads }}
-          extract_archive: "true"
+          extract_archive: true
 
       - run: ls -la
 
