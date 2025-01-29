@@ -1,0 +1,21 @@
+name: a test 7
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-1:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        exclude_dir: ["", "src/third_party"]
+
+    name: Libtorrent ${{ matrix.patch_test }} ${{ matrix.with_cmake_env }}
+
+    steps:
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          exclude_file: ${{ matrix.exclude_dir }}
