@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        exclude_dir: ["", "src/third_party"]
+        exclude_dir: ["", "src/third_party/*"]
 
     name: Libtorrent ${{ matrix.patch_test }} ${{ matrix.with_cmake_env }}
 
