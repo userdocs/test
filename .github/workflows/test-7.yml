@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        exclude_dir: ["", "ninja/src/third_party"]
+        exclude_dir: ["", "ninja/src/third_party/*"]
 
     name: Libtorrent ${{ matrix.patch_test }} ${{ matrix.with_cmake_env }}
 
@@ -19,5 +19,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: codespell-project/actions-codespell@v2
         with:
-          exclude_file: ${{ matrix.exclude_dir }}
+          skip: ${{ matrix.exclude_dir }}
           ignore_words_list: fo,wee,addin,notin
