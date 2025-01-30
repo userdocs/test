@@ -15,7 +15,7 @@ jobs:
         - uses: msys2/setup-msys2@v2
 
   build-2:
-    runs-on: windows-latest-arm64
+    runs-on: windows-2022-arm64
     permissions:
       contents: read
     name: mysy2 arm64
