@@ -1,0 +1,25 @@
+name: a test 8
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-1:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    name: mysy2
+
+    steps:
+        - uses: actions/checkout@v4
+        - uses: msys2/setup-msys2@v2
+
+  build-2:
+    runs-on: windows-latest-arm64
+    permissions:
+      contents: read
+    name: mysy2 arm64
+
+    steps:
+        - uses: actions/checkout@v4
+        - uses: msys2/setup-msys2@v2
