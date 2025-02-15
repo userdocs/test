@@ -1,0 +1,27 @@
+name: a test 9
+
+on:
+  workflow_dispatch:
+
+jobs:
+  arch-ubuntu:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: arch
+        run: |
+            dpkg --print-architecture
+
+  arch-alpine:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+    container:
+      image: alpine:latest
+
+    steps:
+      - name: arch
+        run: |
+            apk info --print-arch
