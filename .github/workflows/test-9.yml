@@ -10,9 +10,11 @@ jobs:
       contents: read
 
     steps:
-      - name: arch
-        run: |
-            dpkg --print-architecture
+      - name: dpkg --print-architecture
+        run: dpkg --print-architecture
+
+      - name: uname -m
+        run: uname -m
 
   arch-alpine:
     runs-on: ubuntu-24.04-arm
@@ -22,6 +24,8 @@ jobs:
       image: alpine:latest
 
     steps:
-      - name: arch
-        run: |
-            apk info --print-arch
+      - name: apk info --print-arch
+        run: apk info --print-arch
+
+      - name: uname -m
+        run: uname -m
