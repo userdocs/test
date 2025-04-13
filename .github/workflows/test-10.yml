@@ -1,0 +1,31 @@
+name: a test 9
+
+on:
+  workflow_dispatch:
+
+jobs:
+  mem-amd:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: ram
+        run: |
+          grep MemTotal /proc/meminfo
+          awk '/MemTotal/ {print $2}' /proc/meminfo
+
+      - name: uname -m
+        run: uname -m
+
+  mem-arm:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+
+    steps:
+      - name: ram
+        run: |
+          grep MemTotal /proc/meminfo
+          awk '/MemTotal/ {print $2}' /proc/meminfo
+
