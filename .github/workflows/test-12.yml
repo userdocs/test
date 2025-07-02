@@ -23,3 +23,4 @@ jobs:
           echo "github.ref_type: ${{ github.ref_type }}"
           echo "github.sha: ${{ github.sha }}"
           echo "github.triggering_actor: ${{ github.triggering_actor }}"
+          sleep 30
