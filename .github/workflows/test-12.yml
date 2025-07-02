@@ -16,10 +16,12 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - run: |
-          echo "github.event: ${{ github.event }}"
+      - name: Dump GitHub event context
+        run: |
           echo "github.event_name: ${{ github.event_name }}"
           echo "github.ref: ${{ github.ref }}"
           echo "github.ref_type: ${{ github.ref_type }}"
           echo "github.sha: ${{ github.sha }}"
           echo "github.triggering_actor: ${{ github.triggering_actor }}"
+          echo "Full GitHub event payload:"
+          echo '${{ toJSON(github.event) }}'
