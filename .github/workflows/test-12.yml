@@ -13,7 +13,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  build:
+  eventcontext:
     runs-on: ubuntu-24.04
     steps:
       - name: Dump GitHub event context
@@ -23,5 +23,3 @@ jobs:
           echo "github.ref_type: ${{ github.ref_type }}"
           echo "github.sha: ${{ github.sha }}"
           echo "github.triggering_actor: ${{ github.triggering_actor }}"
-          echo "Full GitHub event payload:"
-          # echo '${{ toJSON(github.event) }}'
