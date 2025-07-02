@@ -1,0 +1,29 @@
+name: a test 11
+
+on:
+  workflow_dispatch:
+
+jobs:
+  alpine-checkout-amd:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    container: alpine:edge
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: test
+        run: echo hi
+
+  alpine-checkout-arm:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+    container: alpine:edge
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: test
+        run: echo hi
