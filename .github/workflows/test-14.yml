@@ -48,9 +48,6 @@ jobs:
     # container: ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl
 
     steps:
-      - name: Host - update
-        run: sudo apt-get update
-
       - name: Host - set up qemu-user-static binfmt-support
         run: sudo apt install qemu-user-static binfmt-support
 
