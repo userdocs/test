@@ -4,6 +4,14 @@ on:
   workflow_dispatch:
 
 jobs:
+  qemu-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Register QEMU emulators
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
   docker-test:
     runs-on: ubuntu-24.04-arm
     container: ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl
@@ -39,8 +47,4 @@ jobs:
         run: file ./hello
 
       - name: Test Hello World binary
-        run: |
-          apk update
-          apk add qemu qemu-openrc qemu-riscv64
-          # apk add qemu-aarch64 qemu-arm qemu-riscv64 qemu-s390x
-          /usr/bin/qemu-riscv64 ./hello
+        run: ./hello
