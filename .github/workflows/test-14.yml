@@ -5,38 +5,41 @@ on:
 
 jobs:
   docker-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
+    # container: ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl
+
     steps:
-      - name: Register QEMU emulators
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: all
+      - name: Host - update
+        run: sudo apt-get update
 
-      - name: Run cross-arch container test
-        uses: addnab/docker-run-action@v3
-        with:
-          image: ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl
-          options: --privileged
-          run: |
-            set -eux
-            echo "--- Checking compiler ---"
-            file /usr/local/bin/riscv64-linux-musl-gcc
-            /usr/local/bin/gcc -v
+      - name: Host - set up qemu-user-static binfmt-support
+        run: sudo apt install qemu-user-static binfmt-support
 
-            echo "--- Creating source file ---"
-            cat > hello.c << 'EOF'
-            #include <stdio.h>
-            int main() {
-                printf("Hello World!\n");
-                return 0;
-            }
-            EOF
+      - name: file gcc
+        env:
+          arch_type: ${{ matrix.arch_type }}
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl file /usr/local/bin/${arch_type}-gcc
 
-            echo "--- Compiling binary ---"
-            gcc -static -o hello hello.c
+      - name: gcc -v
+        env:
+          arch_type: ${{ matrix.arch_type }}
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl file /usr/local/bin/gcc -v
 
-            echo "--- Checking binary type ---"
-            file ./hello
+      - name: Create Hello World source
+        run: |
+          cat > hello.c << 'EOF'
+          #include <stdio.h>
+          int main() {
+              printf("Hello World!\n");
+              return 0;
+          }
+          EOF
 
-            echo "--- Running binary ---"
-            ./hello
+      - name: Compile static Hello World binary
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl gcc -static -o hello hello.c
+
+      - name: file hello
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl file ./hello
+
+      - name: Test Hello World binary
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl./hello
