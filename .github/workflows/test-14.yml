@@ -40,6 +40,6 @@ jobs:
 
       - name: Test Hello World binary
         run: |
-          apk add update
+          apk update
           apk add qemu qemu-openrc
           ./hello
