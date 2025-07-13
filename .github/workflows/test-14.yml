@@ -17,7 +17,7 @@ jobs:
       - name: gcc -v
         env:
           arch_type: ${{ matrix.arch_type }}
-        run: /usr/local/bin/${arch_type}-gcc -v
+        run: /usr/local/bin/gcc -v
 
       - name: Create Hello World source
         run: |
