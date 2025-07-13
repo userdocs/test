@@ -4,7 +4,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  docker-test:
+  docker-test-1:
+    runs-on: ubuntu-24.04-arm
+    # container: ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl
+
+    steps:
+      - name: Register QEMU emulators
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
+      - name: file gcc
+        env:
+          arch_type: ${{ matrix.arch_type }}
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl file /usr/local/bin/${arch_type}-gcc
+
+      - name: gcc -v
+        env:
+          arch_type: ${{ matrix.arch_type }}
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl file /usr/local/bin/gcc -v
+
+      - name: Create Hello World source
+        run: |
+          cat > hello.c << 'EOF'
+          #include <stdio.h>
+          int main() {
+              printf("Hello World!\n");
+              return 0;
+          }
+          EOF
+
+      - name: Compile static Hello World binary
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl gcc -static -o hello hello.c
+
+      - name: file hello
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl file ./hello
+
+      - name: Test Hello World binary
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl./hello
+
+  docker-test-2:
     runs-on: ubuntu-24.04-arm
     # container: ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl
 
