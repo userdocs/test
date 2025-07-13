@@ -57,7 +57,7 @@ jobs:
       - name: file gcc
         env:
           arch_type: ${{ matrix.arch_type }}
-        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl file /usr/local/bin/${arch_type}-gcc
+        run: docker run -it ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl file /usr/local/bin/gcc
 
       - name: gcc -v
         env:
