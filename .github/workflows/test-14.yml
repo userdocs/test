@@ -39,4 +39,7 @@ jobs:
         run: file ./hello
 
       - name: Test Hello World binary
-        run: ./hello
+        run: |
+          apk add update
+          apk add qemu qemu-openrc
+          ./hello
