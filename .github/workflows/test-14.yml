@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  qemu-setup:
+  docker-test:
     runs-on: ubuntu-latest
     steps:
       - name: Register QEMU emulators
@@ -12,35 +12,31 @@ jobs:
         with:
           platforms: all
 
-  docker-test:
-    needs: qemu-setup
-    runs-on: ubuntu-latest # use a standard runner so QEMU works
-    container:
-      image: ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl
-      options: --privileged # allow binfmt_misc to be visible
+      - name: Run cross-arch container test
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl
+          options: --privileged
+          run: |
+            set -eux
+            echo "--- Checking compiler ---"
+            file /usr/local/bin/riscv64-linux-musl-gcc
+            /usr/local/bin/gcc -v
 
-    steps:
-      - name: file gcc
-        run: file /usr/local/bin/riscv64-linux-musl-gcc
+            echo "--- Creating source file ---"
+            cat > hello.c << 'EOF'
+            #include <stdio.h>
+            int main() {
+                printf("Hello World!\n");
+                return 0;
+            }
+            EOF
 
-      - name: gcc -v
-        run: /usr/local/bin/gcc -v
+            echo "--- Compiling binary ---"
+            gcc -static -o hello hello.c
 
-      - name: Create Hello World source
-        run: |
-          cat > hello.c << 'EOF'
-          #include <stdio.h>
-          int main() {
-              printf("Hello World!\n");
-              return 0;
-          }
-          EOF
+            echo "--- Checking binary type ---"
+            file ./hello
 
-      - name: Compile static Hello World binary
-        run: gcc -static -o hello hello.c
-
-      - name: file hello
-        run: file ./hello
-
-      - name: Test Hello World binary
-        run: ./hello
+            echo "--- Running binary ---"
+            ./hello
