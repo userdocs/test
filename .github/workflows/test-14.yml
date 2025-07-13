@@ -43,4 +43,4 @@ jobs:
           apk update
           apk add qemu qemu-openrc qemu-riscv64
           # apk add qemu-aarch64 qemu-arm qemu-riscv64 qemu-s390x
-          ./hello
+          /usr/bin/qemu-riscv64 ./hello
