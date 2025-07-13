@@ -1,0 +1,50 @@
+name: ca test 13
+
+on:
+  pull_request:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eventcontext:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Dump GitHub permissions context
+        run: |
+          echo "=== GitHub Permissions Context ==="
+          echo "GITHUB_TOKEN permissions:"
+          echo "  actions: ${{ toJson(github.token.permissions.actions) }}"
+          echo "  checks: ${{ toJson(github.token.permissions.checks) }}"
+          echo "  contents: ${{ toJson(github.token.permissions.contents) }}"
+          echo "  deployments: ${{ toJson(github.token.permissions.deployments) }}"
+          echo "  id-token: ${{ toJson(github.token.permissions.id-token) }}"
+          echo "  issues: ${{ toJson(github.token.permissions.issues) }}"
+          echo "  discussions: ${{ toJson(github.token.permissions.discussions) }}"
+          echo "  packages: ${{ toJson(github.token.permissions.packages) }}"
+          echo "  pages: ${{ toJson(github.token.permissions.pages) }}"
+          echo "  pull-requests: ${{ toJson(github.token.permissions.pull-requests) }}"
+          echo "  repository-projects: ${{ toJson(github.token.permissions.repository-projects) }}"
+          echo "  security-events: ${{ toJson(github.token.permissions.security-events) }}"
+          echo "  statuses: ${{ toJson(github.token.permissions.statuses) }}"
+          echo ""
+          echo "=== Default Permissions (when not specified) ==="
+          echo "For pull_request events from forks:"
+          echo "  contents: read"
+          echo "  metadata: read"
+          echo "  pull-requests: read"
+          echo ""
+          echo "For push events:"
+          echo "  contents: read"
+          echo "  metadata: read"
+          echo "  actions: write"
+          echo "  checks: write"
+          echo "  deployments: write"
+          echo "  issues: write"
+          echo "  packages: write"
+          echo "  pull-requests: write"
+          echo "  repository-projects: write"
+          echo "  security-events: write"
+          echo "  statuses: write"
