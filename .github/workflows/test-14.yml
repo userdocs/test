@@ -66,7 +66,7 @@ jobs:
 
       - name: Run cross-arch container test
         run: >
-          docker run -v ~/:/root -w /root ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl bash -c '
+          docker run -v ${{ github.workspace }}:/root -w /root ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl bash -c '
           echo "--- Checking compiler ---" &&
           file /usr/local/bin/riscv64-linux-musl-gcc &&
           /usr/local/bin/gcc -v &&
