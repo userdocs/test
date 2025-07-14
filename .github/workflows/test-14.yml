@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  docker-test:
+  docker-test-1:
     runs-on: ubuntu-latest
     steps:
       - name: Register QEMU emulators
@@ -40,3 +40,38 @@ jobs:
 
             echo "--- Running binary ---"
             ./hello
+
+  docker-test-2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Register QEMU emulators
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
+      - name: Run cross-arch container test
+        run: |
+          echo "--- Creating source file ---"
+          cat > hello.c << 'EOF'
+          #include <stdio.h>
+          int main() {
+              printf("Hello World!\n");
+              return 0;
+          }
+          EOF
+
+      - name: Run cross-arch container test
+        run: >
+          docker run -v ~/:/root -w /root ghcr.io/userdocs/qbt-musl-cross-make:riscv64-linux-musl bash -c '
+          echo "--- Checking compiler ---" &&
+          file /usr/local/bin/riscv64-linux-musl-gcc &&
+          /usr/local/bin/gcc -v &&
+
+          echo "--- Compiling binary ---" &&
+          gcc -static -o hello hello.c &&
+
+          echo "--- Checking binary type ---" &&
+          file ./hello &&
+
+          echo "--- Running binary ---" &&
+          ./hello'
