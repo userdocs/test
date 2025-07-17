@@ -23,4 +23,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.TEST }}
         run: |
-          gh api notifications --jq '.[] | select (.subject.title | contains("Fix filters")) | .url' | PAGER= xargs gh api --method DELETE
+          # List notifications, filter for "workflow run cancelled", and mark them as done
+          gh api notifications \
+            --jq '.[] | select(.subject.title | contains("workflow run cancelled")) | .id' -q | \
+          while read id; do
+            echo "$id"
+            gh api -X PATCH "notifications/threads/$id"
+          done
