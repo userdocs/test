@@ -23,8 +23,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.TEST }}
         run: |
-          # List notifications, filter for "workflow run cancelled", and mark them as done
-          gh api notifications --jq '.[] | select(.subject.title | contains("workflow run cancelled")) | .id' | while read id; do
+          gh api notifications --paginate --jq '.[] | select(.subject.title | contains("workflow run cancelled")) | .id' | while read id; do
               echo "$id"
               gh api -X DELETE "notifications/threads/$id"
           done
