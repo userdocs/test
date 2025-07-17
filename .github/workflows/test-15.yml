@@ -23,5 +23,7 @@ jobs:
 
       - name: test
         if: cancelled()
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          true
+          gh api notifications --jq '.[] | select (.subject.title | contains("Fix filters")) | .url' | PAGER= xargs gh api --method DELETE
