@@ -3,6 +3,8 @@ name: "15"
 on:
   workflow_dispatch:
 
+permissions: write-all
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
