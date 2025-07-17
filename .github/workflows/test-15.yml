@@ -1,0 +1,27 @@
+name: "15"
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-test-2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Register QEMU emulators
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      - name: create test file
+        run: |
+          echo sleep 180
+          sleep 180
+
+      - name: test
+        if: cancelled()
+        run: |
+          true
