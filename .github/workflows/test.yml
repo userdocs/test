@@ -18,9 +18,9 @@ jobs:
       matrix:
         os_id: ["ubuntu", "alpine", "debian"]
         include:
-          - os_id: "ubuntu-24.04"
+          - os_id: "ubuntu"
             container_name: "ubuntu-test-container"
-            os_version_id: 24.04
+            os_version_id: latest
           - os_id: "alpine"
             container_name: "alpine-test-container"
             os_version_id: "edge"
@@ -41,7 +41,7 @@ jobs:
             container_name: "${{ env.container_name }}"
             os_id: ${{ matrix.os_id }}
             os_version_id: ${{ matrix.os_version_id }}
-            custom_commands: "-e 'test=1' -e 'test2=2' -e 'test3=3'"
+            custom_commands: '-e "test=1" -e "test2=2" -e "test3=3"'
 
       - run: docker exec ${container_name} ls
       - run: docker exec ${container_name} env
