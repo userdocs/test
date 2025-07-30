@@ -41,10 +41,10 @@ jobs:
             container_name: "${{ env.container_name }}"
             os_id: ${{ matrix.os_id }}
             os_version_id: ${{ matrix.os_version_id }}
-            custom_commands: '-e "test=1" -e "test2=2" -e "test3=3"'
+            custom_commands: '-e "test=1" -e test2=2 -e "test3=3"'
 
       - run: docker exec ${container_name} ls >> $GITHUB_STEP_SUMMARY
       - run: docker exec ${container_name} env >> $GITHUB_STEP_SUMMARY
       - run: docker exec ${container_name} cat /etc/os-release >> $GITHUB_STEP_SUMMARY
-      - run: docker exec ${container_name} echo $test1 >> $GITHUB_STEP_SUMMARY
-      - run: docker exec ${container_name} echo $test2 >> $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} echo "test1:$test1" >> $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} echo "test2:$test2" >> $GITHUB_STEP_SUMMARY
