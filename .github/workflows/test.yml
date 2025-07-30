@@ -32,6 +32,8 @@ jobs:
     steps:
       - run: touch test.txt
 
+      - run: touch env.custom
+
       - uses: userdocs/actions/qbt_docker@main
         with:
             distinct_id: ""
