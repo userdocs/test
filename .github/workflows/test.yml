@@ -32,12 +32,13 @@ jobs:
     steps:
       - run: touch test.txt
 
-      # - run: touch env.custom
+      - run: echo "qbt_cross_name=aarch64" > env.custom
 
       - uses: userdocs/actions/qbt_docker@main
         with:
+            # if the env.custom file exists, it will be used to pass environment
             distinct_id: ""
-            use_host_env: "true"
+            use_host_env: "false"
             container_name: "${{ env.container_name }}"
             os_id: ${{ matrix.os_id }}
             os_version_id: ${{ matrix.os_version_id }}
