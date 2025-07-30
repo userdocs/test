@@ -43,6 +43,6 @@ jobs:
             os_version_id: ${{ matrix.os_version_id }}
             custom_commands: '-e "test=1" -e "test2=2" -e "test3=3"'
 
-      - run: docker exec ${container_name} ls
-      - run: docker exec ${container_name} env
-      - run: docker exec ${container_name} cat /etc/os-release
+      - run: docker exec ${container_name} ls >> $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} env >> $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} cat /etc/os-release >> $GITHUB_STEP_SUMMARY
