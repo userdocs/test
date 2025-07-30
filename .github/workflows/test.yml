@@ -46,6 +46,6 @@ jobs:
       - run: docker exec ${container_name} ls >> $GITHUB_STEP_SUMMARY
       - run: docker exec ${container_name} env >> $GITHUB_STEP_SUMMARY
       - run: docker exec ${container_name} cat /etc/os-release >> $GITHUB_STEP_SUMMARY
-      - run: docker exec ${container_name} -sh -c 'echo "test1:$test1"' >> $GITHUB_STEP_SUMMARY
-      - run: docker exec ${container_name} -sh -c 'echo "test2:$test2"' >> $GITHUB_STEP_SUMMARY
-      - run: docker exec ${container_name} -sh -c 'echo "test3:$test3"' >> $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} sh -c 'echo "test1:$test1"' >> $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} sh -c 'echo "test2:$test2"' >> $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} sh -c 'echo "test3:$test3"' >> $GITHUB_STEP_SUMMARY
