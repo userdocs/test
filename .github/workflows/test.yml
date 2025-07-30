@@ -45,3 +45,4 @@ jobs:
 
       - run: docker exec ${container_name} ls
       - run: docker exec ${container_name} env
+      - run: docker exec ${container_name} cat /etc/os-release
