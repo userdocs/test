@@ -20,10 +20,10 @@ jobs:
       container_name: "boost"
     steps:
       - run: |
-          touch ${{ github.ref_name }}-b2-nodocs.zip
-          touch ${{ github.ref_name }}-b2-nodocs.zip.txt
-          touch ${{ github.ref_name }}-b2-nodocs.7z
-          touch ${{ github.ref_name }}-b2-nodocs.7z.txt
+          echo "Release archive for ${{ github.ref_name }}" > ${{ github.ref_name }}-b2-nodocs.zip
+          echo "SHA256 checksum placeholder" > ${{ github.ref_name }}-b2-nodocs.zip.txt
+          echo "Release archive for ${{ github.ref_name }}" > ${{ github.ref_name }}-b2-nodocs.7z
+          echo "SHA256 checksum placeholder" > ${{ github.ref_name }}-b2-nodocs.7z.txt
 
       - uses: softprops/action-gh-release@v2
         with:
