@@ -1,4 +1,4 @@
-name: "01"
+name: "01 boost"
 
 on:
   workflow_dispatch:
