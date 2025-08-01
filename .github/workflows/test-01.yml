@@ -1,0 +1,36 @@
+name: "0"
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      container_name: "boost"
+    steps:
+      - run: |
+          touch ${{ github.ref_name }}-b2-nodocs.zip
+          touch ${{ github.ref_name }}-b2-nodocs.zip.txt
+          touch ${{ github.ref_name }}-b2-nodocs.7z
+          touch ${{ github.ref_name }}-b2-nodocs.7z.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ github.ref_name }}-b2-nodocs.zip
+            ${{ github.ref_name }}-b2-nodocs.zip.txt
+            ${{ github.ref_name }}-b2-nodocs.7z
+            ${{ github.ref_name }}-b2-nodocs.7z.txt
+          make_latest: ${{ contains(github.ref_name, '.beta') && 'false' || 'true' }}
+
