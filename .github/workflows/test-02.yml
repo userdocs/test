@@ -68,7 +68,7 @@ jobs:
         if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
         run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
 
-      - run: docker exec ${container_name} bash -c 'ls /lib/*'
+      - run: docker exec ${container_name} bash -c 'ls /lib/ | grep -E "*-*"
 
       - run: |
           chmod +x qi.bash
