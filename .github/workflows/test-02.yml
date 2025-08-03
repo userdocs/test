@@ -37,6 +37,6 @@ jobs:
       - run: arch | tee -a $GITHUB_STEP_SUMMARY
 
       - run: |
-          chmod +x qu.bash
-          ./qu.bash
+          chmod +x qi.bash
+          ./qi.bash
 
