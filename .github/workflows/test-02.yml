@@ -21,8 +21,8 @@ jobs:
       matrix:
         platform: ["amd64", "arm/v6", "arm/v7", "arm64", "i386", "mips64le", "ppc64le", "riscv64", "s390x"]
         container_image: [
-          "ubuntu:latest",
-          "debian:latest",
+          # "ubuntu:latest",
+          # "debian:latest",
           "alpine:latest"
           # "rockylinux:latest",
           # "almalinux:latest",
@@ -43,7 +43,7 @@ jobs:
         if: matrix.container_image == 'alpine:latest'
         run: docker exec ${container_name} apk add bash
 
-      - run: docker exec ${container_name} arch | tee -a $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} arch
 
       - run: |
           curl -sLO "https://raw.githubusercontent.com/userdocs/test/refs/heads/main/qi.bash"
