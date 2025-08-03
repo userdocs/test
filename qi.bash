@@ -1,200 +1,196 @@
 #!/bin/bash
-
 # qBittorrent-nox Static Binary Installer
-# Automatically detects architecture and installs the correct binary
-
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Colors
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' NC='\033[0m'
+print_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
+print_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# Base URL for downloads
-BASE_URL="https://github.com/userdocs/qbittorrent-nox-static/releases/latest/download"
+# Get release tag from API or use fallback
+get_release_tag() {
+	local api="https://github.com/userdocs/qbittorrent-nox-static/releases/latest/download/dependency-version.json"
+	local ver="${LIBTORRENT_VERSION:-v2}"
 
-# Function to print colored output
-print_info() {
-	echo -e "${GREEN}[INFO]${NC} $1"
+	if command -v curl jq &> /dev/null; then
+		case "$ver" in
+			v1) jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_1_2)"' < <(curl -sL "$api" 2> /dev/null) 2> /dev/null || echo "release-4.6.7_v1.2.19" ;;
+			v2) jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_2_0)"' < <(curl -sL "$api" 2> /dev/null) 2> /dev/null || echo "release-4.6.7_v2.0.10" ;;
+			*) echo "release-4.6.7_v2.0.10" ;;
+		esac
+	else
+		case "$ver" in
+			v1) echo "release-4.6.7_v1.2.19" ;;
+			*) echo "release-4.6.7_v2.0.10" ;;
+		esac
+	fi
 }
 
-print_warn() {
-	echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-print_error() {
-	echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Function to detect architecture using arch command
-detect_architecture() {
-	if ! command -v arch > /dev/null 2>&1; then
+# Detect architecture and map to binary name
+detect_arch() {
+	command -v arch > /dev/null || {
 		print_error "arch command not found"
 		exit 1
-	fi
-
-	local arch_output
-	arch_output=$(arch)
-
-	case "$arch_output" in
-		x86_64 | amd64)
-			echo "x86_64"
-			;;
-		i386 | i486 | i586 | i686 | x86)
-			echo "x86"
-			;;
-		aarch64 | arm64)
-			echo "aarch64"
-			;;
-		armv7l | armv7*)
-			echo "armv7"
-			;;
-		armv6l | armv6*)
-			echo "armhf"
-			;;
+	}
+	case "$(arch)" in
+		x86_64 | amd64) echo "x86_64" ;;
+		i?86 | x86) echo "x86" ;;
+		aarch64 | arm64) echo "aarch64" ;;
+		armv7*) echo "armv7" ;;
+		armv6*) echo "armhf" ;;
 		*)
-			print_error "Unsupported architecture: $arch_output"
-			print_error "Supported: x86, x86_64, armhf, armv7, aarch64"
+			print_error "Unsupported architecture: $(arch)"
 			exit 1
 			;;
 	esac
 }
 
-# Function to check if download tool is available
-get_download_tool() {
-	if command -v wget > /dev/null 2>&1; then
-		echo "wget"
-	elif command -v curl > /dev/null 2>&1; then
-		echo "curl"
+# Download file using available tool
+download() {
+	local url="$1" output="$2"
+	print_info "Downloading: $url"
+	if command -v wget > /dev/null; then
+		wget -qO "$output" "$url"
+	elif command -v curl > /dev/null; then
+		curl -sL -o "$output" "$url"
 	else
-		print_error "Neither wget nor curl is available"
+		print_error "Neither wget nor curl available"
 		exit 1
 	fi
 }
 
-# Function to download file
-download_file() {
-	local url="$1"
-	local output="$2"
-	local tool="$3"
-
-	print_info "Downloading: $url"
-
-	case "$tool" in
-		wget)
-			wget -qO "$output" "$url"
-			;;
-		curl)
-			curl -sL -o "$output" "$url"
-			;;
-	esac
-}
-
-# Main function
+# Main installation
 main() {
 	print_info "qBittorrent-nox Static Binary Installer"
 	print_info "========================================"
 
-	# Get architecture and download tool
-	local arch
-	local download_tool
-	local binary_name
+	local arch="${FORCE_ARCH:-$(detect_arch)}"
+	local libtorrent_ver="${LIBTORRENT_VERSION:-v2}"
+	local release_tag
 	local install_path="$HOME/bin/qbittorrent-nox"
 
-	arch=$(detect_architecture)
-	download_tool=$(get_download_tool)
+	release_tag="$(get_release_tag)"
 
-	# Override architecture if forced
-	if [[ -n ${FORCE_ARCH:-} ]]; then
-		print_warn "Forcing architecture: $FORCE_ARCH (was: $arch)"
-		arch="$FORCE_ARCH"
-	fi
+	[[ -n ${FORCE_ARCH:-} ]] && print_warn "Forcing architecture: $arch (was: $(detect_arch))"
 
 	print_info "Architecture: $arch"
-	print_info "Download tool: $download_tool"
+	print_info "Download tool: $(command -v wget > /dev/null && echo wget || echo curl)"
+	print_info "LibTorrent version: $libtorrent_ver"
+	print_info "Release tag: $release_tag"
+	print_info "Attestation verification: $(command -v gh > /dev/null && echo "enabled" || echo "disabled (gh cli not found)")"
 
-	# Map architecture to binary name
-	case "$arch" in
-		x86_64) binary_name="x86_64-qbittorrent-nox" ;;
-		x86) binary_name="x86-qbittorrent-nox" ;;
-		aarch64) binary_name="aarch64-qbittorrent-nox" ;;
-		armv7) binary_name="armv7-qbittorrent-nox" ;;
-		armhf) binary_name="armhf-qbittorrent-nox" ;;
-		*)
-			print_error "No binary available for: $arch"
-			exit 1
-			;;
-	esac
+	local binary_name="${arch}-qbittorrent-nox"
+	local url="https://github.com/userdocs/qbittorrent-nox-static/releases/download/${release_tag}/${binary_name}"
 
-	# Create bin directory and download
 	mkdir -p "$HOME/bin"
-
-	print_info "Downloading $binary_name..."
-	if ! download_file "$BASE_URL/$binary_name" "$install_path" "$download_tool"; then
-		print_error "Download failed: $BASE_URL/$binary_name"
+	download "$url" "$install_path" || {
+		print_error "Download failed: $url"
 		exit 1
-	fi
+	}
 
-	# Make executable and verify
 	chmod 755 "$install_path"
-
-	if [[ ! -s $install_path ]]; then
+	[[ ! -s $install_path ]] && {
 		print_error "Downloaded file is empty"
 		exit 1
-	fi
+	}
 
 	print_info "Installation complete: $install_path"
 
-	# Test the binary
+	# Show file checksum
+	if command -v sha256sum > /dev/null; then
+		local checksum
+		checksum=$(sha256sum "$install_path" | cut -d' ' -f1)
+		print_info "SHA256: $checksum"
+	elif command -v shasum > /dev/null; then
+		local checksum
+		checksum=$(shasum -a 256 "$install_path" | cut -d' ' -f1)
+		print_info "SHA256: $checksum"
+	fi
+
+	# Verify attestations if GitHub CLI is available
+	if command -v gh > /dev/null; then
+		print_info "Verifying attestations with GitHub CLI..."
+		if gh attestation verify "$install_path" --repo userdocs/qbittorrent-nox-static 2> /dev/null; then
+			print_info "✓ Attestations verified successfully"
+		else
+			print_warn "⚠ Attestation verification failed or not available"
+		fi
+	else
+		print_warn "GitHub CLI not found - skipping attestation verification"
+	fi
+
+	# Test binary
 	if "$install_path" --version > /dev/null 2>&1; then
-		local version
-		version=$("$install_path" --version | head -1)
-		print_info "Version: $version"
+		print_info "Version: $("$install_path" --version | head -1)"
 	else
 		print_warn "Binary test failed - may not be compatible"
 	fi
 
 	# PATH check
-	if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
+	[[ ":$PATH:" != *":$HOME/bin:"* ]] && {
 		print_warn '$HOME/bin is not in your PATH'
 		print_info 'Add to ~/.bashrc: export PATH="$HOME/bin:$PATH"'
-	fi
+	}
 
 	print_info "Run with: qbittorrent-nox"
 }
 
-# Handle command line arguments
+# Command line arguments
 while [[ $# -gt 0 ]]; do
 	case $1 in
 		--force-arch)
 			FORCE_ARCH="$2"
 			shift 2
 			;;
+		--libtorrent)
+			case "$2" in
+				v1 | v2) LIBTORRENT_VERSION="$2" ;;
+				1) LIBTORRENT_VERSION="v1" ;;
+				2) LIBTORRENT_VERSION="v2" ;;
+				*)
+					print_error "Invalid libtorrent version: $2. Use: v1, v2, 1, or 2"
+					exit 1
+					;;
+			esac
+			shift 2
+			;;
 		--check)
-			echo "Architecture: $(detect_architecture)"
-			echo "Download tool: $(get_download_tool)"
+			echo "Architecture: $(detect_arch)"
+			echo "Download tool: $(command -v wget > /dev/null && echo wget || echo curl)"
+			echo "LibTorrent version: ${LIBTORRENT_VERSION:-v2}"
+			echo "Release tag: $(get_release_tag)"
+			echo "Base URL: https://github.com/userdocs/qbittorrent-nox-static/releases/download/$(get_release_tag)"
+			echo "GitHub CLI: $(command -v gh > /dev/null && echo "available (attestations will be verified)" || echo "not available")"
 			exit 0
 			;;
 		--help | -h)
-			echo "Usage: $0 [OPTIONS]"
-			echo ""
-			echo "Options:"
-			echo "  --check              Show system information"
-			echo "  --force-arch ARCH    Force architecture (x86, x86_64, armhf, armv7, aarch64)"
-			echo "  --help               Show this help"
-			echo ""
-			echo "Automatically downloads the correct qbittorrent-nox static binary"
-			echo "for your architecture using the 'arch' command."
+			cat << EOF
+Usage: $0 [OPTIONS]
+
+Options:
+  --check              Show system information
+  --force-arch ARCH    Force architecture (x86, x86_64, armhf, armv7, aarch64)
+  --libtorrent VER     LibTorrent version (v1, v2, 1, 2) [default: v2]
+  --help               Show this help
+
+Environment Variables:
+  LIBTORRENT_VERSION   LibTorrent version (v1, v2) [default: v2]
+  FORCE_ARCH           Force architecture override
+
+Examples:
+  $0                   # Install with LibTorrent v2 (default)
+  $0 --libtorrent v1   # Install with LibTorrent v1
+  $0 --check           # Show system info and versions
+  LIBTORRENT_VERSION=v1 $0  # Install with LibTorrent v1 via env var
+EOF
 			exit 0
 			;;
 		*)
-			print_error "Unknown option: $1"
-			echo "Use --help for usage information"
+			print_error "Unknown option: $1. Use --help for usage information"
 			exit 1
 			;;
 	esac
 done
 
-# Run main function
 main
