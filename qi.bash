@@ -26,10 +26,10 @@ validate_system() {
 		errors+=("No download tool available. Install curl or wget.")
 	fi
 
-	# Check for arch command
-	if ! has_command arch; then
-		missing_deps+=("arch")
-		errors+=("Architecture detection tool missing. Install coreutils or util-linux.")
+	# Check for architecture detection tools
+	if ! has_command arch && ! has_command apk && ! has_command dpkg; then
+		missing_deps+=("arch, apk, or dpkg")
+		errors+=("Architecture detection tool missing. Install coreutils/util-linux (arch), alpine-tools (apk), or dpkg.")
 	fi
 
 	# Check for checksum tools
@@ -37,14 +37,23 @@ validate_system() {
 		print_warn "No checksum tool found (sha256sum/shasum) - file verification will be skipped"
 	fi
 
-	# Validate architecture if arch command exists
+	# Validate architecture if detection tools exist
+	local detected_arch=""
 	if has_command arch; then
-		case "$(arch)" in
-			x86_64 | amd64 | x86 | aarch64 | arm64 | armv7* | armv6* | riscv64)
+		detected_arch="$(arch)"
+	elif has_command apk; then
+		detected_arch="$(apk --print-arch 2> /dev/null || echo "")"
+	elif has_command dpkg; then
+		detected_arch="$(dpkg --print-architecture 2> /dev/null || echo "")"
+	fi
+
+	if [[ -n $detected_arch ]]; then
+		case "$detected_arch" in
+			x86_64 | amd64 | x86 | aarch64 | arm64 | armv7* | armv6* | riscv64 | armhf | armel)
 				: # Architecture is supported
 				;;
 			*)
-				errors+=("Unsupported architecture: $(arch). Supported: x86_64, x86, aarch64, armv7, armhf, riscv64")
+				errors+=("Unsupported architecture: $detected_arch. Supported: x86_64, x86, aarch64, armv7, armhf, riscv64")
 				;;
 		esac
 	fi
@@ -84,13 +93,25 @@ get_download_tool() {
 
 # Detect and map architecture to binary name
 detect_arch() {
-	case "$(arch)" in
+	local arch_output=""
+
+	# Try different architecture detection methods
+	if has_command arch; then
+		arch_output="$(arch)"
+	elif has_command apk; then
+		arch_output="$(apk --print-arch 2> /dev/null || echo "")"
+	elif has_command dpkg; then
+		arch_output="$(dpkg --print-architecture 2> /dev/null || echo "")"
+	fi
+
+	case "$arch_output" in
 		x86_64 | amd64) echo "x86_64" ;;
-		x86) echo "x86" ;;
+		x86 | i386 | i686) echo "x86" ;;
 		aarch64 | arm64) echo "aarch64" ;;
-		armv7*) echo "armv7" ;;
-		armv6*) echo "armhf" ;;
+		armv7* | armhf) echo "armv7" ;;
+		armv6* | armel) echo "armhf" ;;
 		riscv64) echo "riscv64" ;;
+		*) echo "" ;;
 	esac
 }
 
