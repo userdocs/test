@@ -17,10 +17,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: $${ matrix.container }}
+      image: ${{ matrix.container_image }}
     strategy:
       matrix:
-        container: ["ubuntu:latest", "debian:latest", "alpine:edge", "fedora:latest", "centos:latest", "rockylinux:latest"]
+        container_image: ["ubuntu:latest", "debian:latest", "alpine:edge", "fedora:latest", "centos:latest", "rockylinux:latest"]
     steps:
       - run: arch
 
