@@ -8,23 +8,60 @@ print_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 print_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# Get release tag from API or use fallback
+# Get release tag from API - no fallbacks
 get_release_tag() {
 	local api="https://github.com/userdocs/qbittorrent-nox-static/releases/latest/download/dependency-version.json"
 	local ver="${LIBTORRENT_VERSION:-v2}"
 
-	if command -v curl jq &> /dev/null; then
-		case "$ver" in
-			v1) jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_1_2)"' < <(curl -sL "$api" 2> /dev/null) 2> /dev/null ;;
-			v2) jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_2_0)"' < <(curl -sL "$api" 2> /dev/null) 2> /dev/null ;;
-			*) echo "release-4.6.7_v2.0.10" ;;
-		esac
-	else
-		case "$ver" in
-			v1) echo "release-4.6.7_v1.2.19" ;;
-			*) echo "release-4.6.7_v2.0.10" ;;
-		esac
+	# Check required tools
+	if ! command -v curl > /dev/null; then
+		print_error "curl is required but not found"
+		exit 1
 	fi
+
+	if ! command -v jq > /dev/null; then
+		print_error "jq is required but not found"
+		exit 1
+	fi
+
+	# Fetch and parse API response
+	local response
+	response=$(curl -sL "$api" 2> /dev/null) || {
+		print_error "Failed to fetch release information from GitHub API"
+		exit 1
+	}
+
+	if [[ -z $response ]]; then
+		print_error "Empty response from GitHub API"
+		exit 1
+	fi
+
+	local release_tag
+	case "$ver" in
+		v1)
+			release_tag=$(echo "$response" | jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_1_2)"' 2> /dev/null) || {
+				print_error "Failed to parse release information for LibTorrent v1"
+				exit 1
+			}
+			;;
+		v2)
+			release_tag=$(echo "$response" | jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_2_0)"' 2> /dev/null) || {
+				print_error "Failed to parse release information for LibTorrent v2"
+				exit 1
+			}
+			;;
+		*)
+			print_error "Invalid LibTorrent version: $ver"
+			exit 1
+			;;
+	esac
+
+	if [[ -z $release_tag || $release_tag == "null" ]]; then
+		print_error "Failed to determine release tag from API response"
+		exit 1
+	fi
+
+	echo "$release_tag"
 }
 
 # Detect architecture and map to binary name
