@@ -1,6 +1,26 @@
 #!/bin/bash
-# qBittorrent-nox Static Binary Installer
+# quick installer for qbitorrent-nox-static
 set -euo pipefail
+
+# Check supported distributions
+check_supported_distro() {
+	# Source os-release and check ID
+	if [[ -f /etc/os-release ]]; then
+		source /etc/os-release
+		case "${ID:-}" in
+			alpine | debian | ubuntu)
+				return 0 # Supported distributions
+				;;
+			*)
+				print_error "Unsupported distribution: ${ID:-unknown}. This installer only supports Alpine, Debian, and Ubuntu"
+				exit 1
+				;;
+		esac
+	else
+		print_error "Cannot determine distribution. This installer only supports Alpine, Debian, and Ubuntu"
+		exit 1
+	fi
+}
 
 # Colors
 RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' NC='\033[0m'
@@ -8,22 +28,17 @@ print_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 print_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# Check if command exists
-has_command() {
-	command -v "$1" > /dev/null
-}
-
 # Detect architecture and map to binary name
 detect_arch() {
 	local arch_output=""
 
 	# Try different architecture detection methods
 	# Prioritize distribution-specific tools for better accuracy
-	if has_command apk; then
+	if command -v apk > /dev/null; then
 		arch_output="$(apk --print-arch 2> /dev/null || echo "")"
-	elif has_command dpkg; then
+	elif command -v dpkg > /dev/null; then
 		arch_output="$(dpkg --print-architecture 2> /dev/null || echo "")"
-	elif has_command arch; then
+	elif command -v arch > /dev/null; then
 		arch_output="$(arch)"
 	else
 		print_error "No architecture detection tool found (arch/apk/dpkg)"
@@ -42,7 +57,7 @@ detect_arch() {
 		# armhf = armhf (on Alpine = armv6), armv6*, armel
 		armhf)
 			# Alpine uses apk, Debian/Ubuntu use dpkg
-			if has_command apk; then
+			if command -v apk > /dev/null; then
 				echo "armhf" # Alpine: armhf stays as armhf (armv6 binary)
 			else
 				echo "armv7" # Debian/Ubuntu: armhf maps to armv7 binary
@@ -60,9 +75,9 @@ detect_arch() {
 
 # Get download tool
 get_download_tool() {
-	if has_command wget; then
+	if command -v wget > /dev/null; then
 		echo "wget"
-	elif has_command curl; then
+	elif command -v curl > /dev/null; then
 		echo "curl"
 	else
 		print_error "No download tool found (wget/curl)"
@@ -80,22 +95,30 @@ get_release_tag() {
 	# Fetch API response
 	local response
 	case "$tool" in
-		wget) response=$(wget -qO- "$api" 2> /dev/null) ;;
-		curl) response=$(curl -sL "$api" 2> /dev/null) ;;
+		wget)
+			response=$(wget -qO- "$api" 2> /dev/null)
+			;;
+		curl)
+			response=$(curl -sL "$api" 2> /dev/null)
+			;;
 	esac
 
-	[[ -n $response ]] || {
+	if [[ -z $response ]]; then
 		print_error "Failed to fetch release information"
 		exit 1
-	}
+	fi
 
 	# Parse release tag
 	local qbt_ver libt_ver
 	qbt_ver=$(echo "$response" | sed -rn 's|(.*)"qbittorrent": "(.*)",|\2|p')
 
 	case "$ver" in
-		v1) libt_ver=$(echo "$response" | sed -rn 's|(.*)"libtorrent_1_2": "(.*)",|\2|p') ;;
-		v2) libt_ver=$(echo "$response" | sed -rn 's|(.*)"libtorrent_2_0": "(.*)",|\2|p') ;;
+		v1)
+			libt_ver=$(echo "$response" | sed -rn 's|(.*)"libtorrent_1_2": "(.*)",|\2|p')
+			;;
+		v2)
+			libt_ver=$(echo "$response" | sed -rn 's|(.*)"libtorrent_2_0": "(.*)",|\2|p')
+			;;
 		*)
 			print_error "Invalid LibTorrent version: $ver"
 			exit 1
@@ -113,13 +136,20 @@ download() {
 
 	print_info "Downloading: $url"
 	case "$tool" in
-		wget) wget -qO "$output" "$url" ;;
-		curl) curl -sL -o "$output" "$url" ;;
+		wget)
+			wget -qO "$output" "$url"
+			;;
+		curl)
+			curl -sL -o "$output" "$url"
+			;;
 	esac
 }
 
 # Main installation
 main() {
+	# Check if running on supported distribution
+	check_supported_distro
+
 	print_info "qBittorrent-nox Static Binary Installer"
 	print_info "========================================"
 
@@ -130,7 +160,7 @@ main() {
 	print_info "Architecture: $arch"
 	print_info "Download tool: $(get_download_tool)"
 	print_info "LibTorrent version: $libtorrent_ver"
-	print_info "Attestation verification: $(has_command gh && echo "enabled" || ([[ -n ${GITHUB_ACTIONS:-} ]] && echo "disabled (gh cli not found in GitHub Actions)" || echo "disabled (gh cli not found)"))"
+	print_info "Attestation verification: $(command -v gh > /dev/null && echo "enabled" || echo "disabled (gh cli not found)")"
 
 	# Get release and download
 	local release_tag
@@ -141,22 +171,22 @@ main() {
 	download "$url" "$install_path"
 	chmod 755 "$install_path"
 
-	[[ -s $install_path ]] || {
+	if [[ ! -s $install_path ]]; then
 		print_error "Download failed or file is empty"
 		exit 1
-	}
+	fi
 
 	print_info "Installation complete: $install_path"
 
 	# Show checksum if available
-	if has_command sha256sum; then
+	if command -v sha256sum > /dev/null; then
 		local checksum
 		checksum=$(sha256sum "$install_path" | cut -d' ' -f1)
 		print_info "SHA256: $checksum"
 	fi
 
 	# Verify attestations if GitHub CLI available
-	if has_command gh; then
+	if command -v gh > /dev/null; then
 		print_info "Verifying attestations with GitHub CLI..."
 		if gh attestation verify "$install_path" --repo userdocs/qbittorrent-nox-static 2> /dev/null; then
 			print_info "✓ Attestations verified successfully"
@@ -211,14 +241,18 @@ EOF
 		;;
 	--libtorrent)
 		case "${2:-}" in
-			v1 | v2) LIBTORRENT_VERSION="$2" ;;
+			v1 | v2)
+				LIBTORRENT_VERSION="$2"
+				;;
 			*)
 				print_error "Invalid libtorrent version. Use: v1 or v2"
 				exit 1
 				;;
 		esac
 		;;
-	"") : ;; # No arguments, proceed with defaults
+	"")
+		# No arguments, proceed with defaults
+		;;
 	*)
 		print_error "Unknown option: $1. Use --help for usage"
 		exit 1
