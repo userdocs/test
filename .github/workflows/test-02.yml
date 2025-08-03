@@ -51,7 +51,7 @@ jobs:
           docker run --name ${container_name} -it -d
           -w /root
           -v ${{ github.workspace }}:/root
-          --platform linux/${{ matrix.platform }}
+          --platform ${{ matrix.platform }}
           ${{ matrix.arch }}/${{ matrix.container_image }}
 
 
