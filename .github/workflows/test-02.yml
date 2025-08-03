@@ -68,7 +68,10 @@ jobs:
         if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
         run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
 
-      - run: docker exec ${container_name} bash -c 'ls /lib/ | grep -E "*-*"
+      - run: |
+          printf '\n%b\n' '\`\`\`bash' | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} bash -c 'ls /lib/ | grep -E "*-*" | tee -a $GITHUB_STEP_SUMMARY
+          printf '\n%b\n' '\`\`\`' | tee -a $GITHUB_STEP_SUMMARY
 
       - run: |
           chmod +x qi.bash
