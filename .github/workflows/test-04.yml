@@ -1,0 +1,77 @@
+name: "04 docker"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: ["ubuntu-24.04-arm"]
+        arch: ["amd64", "arm32v6", "arm32v7", "arm64v8", "i386", "riscv64"]
+        container_image: [
+          "ubuntu:latest",
+          "alpine:edge"
+        ]
+        include:
+          - arch: amd64
+            platform: linux/amd64
+          - arch: arm32v6
+            platform: linux/arm/v6
+          - arch: arm32v7
+            platform: linux/arm/v7
+          - arch: arm64v8
+            platform: linux/arm64
+          - arch: i386
+            platform: linux/i386
+          - arch: riscv64
+            platform: linux/riscv64
+        exclude:
+          - arch: i386
+            container_image: ubuntu:latest
+          - arch: arm32v6
+            container_image: ubuntu:latest
+          - arch: riscv64
+            container_image: debian:latest
+          - arch: arm32v6
+            container_image: debian:latest
+
+    env:
+        container_name: "build"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
+        run: >
+          docker run --name ${container_name} -it -d
+          -w /root
+          -v ${{ github.workspace }}:/root
+          -e "GH_TOKEN=${{ github.token }}"
+          --platform ${{ matrix.platform }}
+          ${{ matrix.arch }}/${{ matrix.container_image }}
+
+      - name: Run alpine
+        if: matrix.container_image == 'alpine:edge'
+        run: |
+          docker exec ${container_name} apk update
+          docker exec ${container_name} apk add bash github-cli
+
+      - name: Run debian/ubuntu
+        if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
+        run: |
+          docker exec ${container_name} apt update
+          docker exec ${container_name} apt install gh
+
+      - name: gh --version
+        run: docker exec ${container_name} bash -c 'gh --version'
