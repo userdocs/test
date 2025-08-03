@@ -20,7 +20,23 @@ jobs:
       image: ${{ matrix.container_image }}
     strategy:
       matrix:
-        container_image: ["ubuntu:latest", "debian:latest", "alpine:edge", "fedora:latest", "centos:latest", "rockylinux:latest"]
+        container_image: [
+          "ubuntu:latest",
+          "debian:latest",
+          "alpine:latest",
+          "fedora:latest",
+          "rockylinux:latest",
+          "almalinux:latest",
+          "opensuse/leap:latest"
+        ]
     steps:
-      - run: arch
+
+      - run: apk add bash
+        if: matrix.container_image == 'alpine:latest'
+
+      - run: arch | tee -a $GITHUB_STEP_SUMMARY
+
+      - run: |
+          chmod +x qu.bash
+          ./qu.bash
 
