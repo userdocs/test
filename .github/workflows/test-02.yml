@@ -72,5 +72,5 @@ jobs:
 
       - run: |
           chmod +x qi.bash
-          docker exec ${container_name} bash qi.bash
+          docker exec ${container_name} bash qi.bash | tee -a $GITHUB_STEP_SUMMARY
 
