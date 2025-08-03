@@ -166,8 +166,10 @@ main() {
 	elif [[ -n ${GITHUB_ACTIONS:-} ]]; then
 		print_warn "GitHub Actions detected but gh CLI not found - skipping attestation verification"
 		print_info "Note: GitHub CLI may need to be explicitly installed in your workflow"
+		print_info "Note: GH_TOKEN environment variable is also required for attestation verification"
 	else
 		print_warn "GitHub CLI not found - skipping attestation verification"
+		print_info "Note: Install gh CLI auth login for attestation verification"
 	fi
 
 	# Test binary
