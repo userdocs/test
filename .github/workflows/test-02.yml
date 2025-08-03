@@ -58,18 +58,18 @@ jobs:
           docker run --name ${container_name} -it -d
           -w /root
           -v ${{ github.workspace }}:/root
-          -e "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+          -e "GH_TOKEN=${{ github.token }}"
           --platform ${{ matrix.platform }}
           ${{ matrix.arch }}/${{ matrix.container_image }}
 
       - name: Run apk update
-        if: matrix.container_image == 'alpine:latest'
+        if: matrix.container_image == 'alpine:edge'
         run: |
           docker exec ${container_name} apk update
           docker exec ${container_name} apk add bash github-cli
 
       - name: Run apk update
-        if: matrix.container_image == 'alpine:latest'
+        if: matrix.container_image == 'alpine:edge'
         run: docker exec ${container_name} gh --version
 
       - name: Run apt-get update
