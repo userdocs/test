@@ -3,7 +3,7 @@
 # qBittorrent-nox Static Binary Installer
 # Automatically detects architecture and installs the correct binary
 
-set -euo pipefail
+set -x
 
 # Colors for output
 RED='\033[0;31m'
