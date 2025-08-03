@@ -25,8 +25,11 @@ jobs:
     env:
         container_name: "build"
     steps:
-      - name: Host - Bootstrap qemu
-        uses: userdocs/actions/qemu@main
+      # - name: Host - Bootstrap qemu
+      #   uses: userdocs/actions/qemu@main
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
         run: >
