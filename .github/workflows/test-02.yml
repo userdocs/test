@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [amd64, arm32v6, arm32v7, arm64v8, i386, riscv64, s390x]
+        arch: [amd64, arm32v6, arm32v7, arm64v8, i386, riscv6]
         container_image: [
           "ubuntu:latest",
           "debian:latest",
@@ -31,13 +31,13 @@ jobs:
             platform: linux/i386
           - arch: riscv64
             platform: linux/riscv64
-          - arch: s390x
-            platform: linux/s390x
         exclude:
           - container_image: ubuntu:latest
             arch: i386
           - container_image: debian:latest
             arch: riscv64
+          - container_image: debian:latest
+            arch: arm32v6
 
     env:
         container_name: "build"
