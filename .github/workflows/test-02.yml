@@ -50,6 +50,18 @@ jobs:
         if: matrix.container_image == 'alpine:latest'
         run: docker exec ${container_name} apk add bash
 
+      - name: Run apk update
+        if: matrix.container_image == 'ubuntu:latest'
+        run: docker exec ${container_name} apt-get update && apt-get install -y wget
+
+      - name: Run apk update
+        if: matrix.container_image == 'debian:latest'
+        run: docker exec ${container_name} apt-get update && apt-get install -y wget
+
+      - name: Run apk update
+        if: matrix.container_image == 'rockylinux:latest'
+        run: docker exec ${container_name} yum install -y wget
+
       - run: docker exec ${container_name} sh -c "arch"
 
       - run: |
