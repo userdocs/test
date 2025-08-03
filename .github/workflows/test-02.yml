@@ -32,14 +32,14 @@ jobs:
           - arch: riscv64
             platform: linux/riscv64
         exclude:
-          - container_image: ubuntu:latest
-            arch: i386
-          - container_image: ubuntu:latest
-            arch: arm32v6
-          - container_image: debian:latest
-            arch: riscv64
-          - container_image: debian:latest
-            arch: arm32v6
+          - arch: i386
+            container_image: ubuntu:latest
+          - arch: arm32v6
+            container_image: ubuntu:latest
+          - arch: riscv64
+            container_image: debian:latest
+          - arch: arm32v6
+            container_image: debian:latest
 
     env:
         container_name: "build"
