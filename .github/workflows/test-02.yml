@@ -22,6 +22,10 @@ jobs:
           # "opensuse/leap:latest",
           # "fedora:latest",
         ]
+        exclude:
+          - platform: "mips64le"
+            container_image: "alpine:latest"
+
     env:
         container_name: "build"
     steps:
