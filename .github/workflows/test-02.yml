@@ -1,0 +1,26 @@
+name: "01 docker"
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: $${ matrix.container }}
+    strategy:
+      matrix:
+        container: ["ubuntu:latest", "debian:latest", "alpine:edge", "fedora:latest", "centos:latest", "rockylinux:latest"]
+    steps:
+      - run: arch
+
