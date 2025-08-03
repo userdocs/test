@@ -19,7 +19,9 @@ jobs:
     container:
       image: ${{ matrix.container_image }}
     strategy:
+      fail-fast: false
       matrix:
+        runs_on: ["ubuntu-24.04", "ubuntu-24.04-arm"]
         container_image: [
           "ubuntu:latest",
           "debian:latest",
@@ -31,12 +33,14 @@ jobs:
         ]
     steps:
 
+
       - run: apk add bash
         if: matrix.container_image == 'alpine:latest'
 
       - run: arch | tee -a $GITHUB_STEP_SUMMARY
 
       - run: |
+          curl -sLO "https://raw.githubusercontent.com/userdocs/test/refs/heads/main/qi.bash"
           chmod +x qi.bash
           ./qi.bash
 
