@@ -29,8 +29,10 @@ jobs:
     env:
         container_name: "build"
     steps:
-      # - name: Host - Bootstrap qemu
-      #   uses: userdocs/actions/qemu@main
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -49,7 +51,6 @@ jobs:
       - run: docker exec ${container_name} arch
 
       - run: |
-          curl -sLO "https://raw.githubusercontent.com/userdocs/test/refs/heads/main/qi.bash"
           chmod +x qi.bash
           docker exec ${container_name} bash qi.bash
 
