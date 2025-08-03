@@ -65,6 +65,10 @@ jobs:
         if: matrix.container_image == 'alpine:latest'
         run: docker exec ${container_name} apk add bash github-cli
 
+      - name: Run apk update
+        if: matrix.container_image == 'alpine:latest'
+        run: docker exec ${container_name} gh --version
+
       - name: Run apt-get update
         if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
         run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
