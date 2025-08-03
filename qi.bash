@@ -15,8 +15,8 @@ get_release_tag() {
 
 	if command -v curl jq &> /dev/null; then
 		case "$ver" in
-			v1) jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_1_2)"' < <(curl -sL "$api" 2> /dev/null) 2> /dev/null || echo "release-4.6.7_v1.2.19" ;;
-			v2) jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_2_0)"' < <(curl -sL "$api" 2> /dev/null) 2> /dev/null || echo "release-4.6.7_v2.0.10" ;;
+			v1) jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_1_2)"' < <(curl -sL "$api" 2> /dev/null) 2> /dev/null ;;
+			v2) jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_2_0)"' < <(curl -sL "$api" 2> /dev/null) 2> /dev/null ;;
 			*) echo "release-4.6.7_v2.0.10" ;;
 		esac
 	else
@@ -79,6 +79,18 @@ main() {
 	print_info "LibTorrent version: $libtorrent_ver"
 	print_info "Release tag: $release_tag"
 	print_info "Attestation verification: $(command -v gh > /dev/null && echo "enabled" || echo "disabled (gh cli not found)")"
+
+	# Validate architecture is supported
+	case "$arch" in
+		x86_64 | x86 | aarch64 | armv7 | armhf)
+			print_info "Architecture validated: $arch"
+			;;
+		*)
+			print_error "Unsupported architecture for download: $arch"
+			print_error "Supported architectures: x86_64, x86, aarch64, armv7, armhf"
+			exit 1
+			;;
+	esac
 
 	local binary_name="${arch}-qbittorrent-nox"
 	local url="https://github.com/userdocs/qbittorrent-nox-static/releases/download/${release_tag}/${binary_name}"
