@@ -15,21 +15,24 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-arm
     container:
       image: ${{ matrix.container_image }}
+      options: --platform linux/${{ matrix.platform }}
+      volumes:
+        - ${{ github.workspace }}:/root
     strategy:
       fail-fast: false
       matrix:
-        runs_on: ["ubuntu-24.04", "ubuntu-24.04-arm"]
+        platform: ["amd64", "arm/v6", "arm/v7", "arm64", "i386", "mips64le", "ppc64le", "riscv64", "s390x"]
         container_image: [
           "ubuntu:latest",
           "debian:latest",
-          "alpine:latest",
-          "fedora:latest",
-          "rockylinux:latest",
-          "almalinux:latest",
-          "opensuse/leap:latest"
+          "alpine:latest"
+          # "rockylinux:latest",
+          # "almalinux:latest",
+          # "opensuse/leap:latest",
+          # "fedora:latest",
         ]
     steps:
 
