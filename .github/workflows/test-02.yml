@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ["amd64", "arm/v6", "arm/v7", "arm64", "i386", "mips64le", "ppc64le", "riscv64", "s390x"]
+        platform: ["amd64", "arm/v6", "arm/v7", "arm64", "i386", "riscv64", "mips64le", "ppc64le", "s390x"]
         container_image: [
           # "ubuntu:latest",
           # "debian:latest",
@@ -48,7 +48,7 @@ jobs:
         if: matrix.container_image == 'alpine:latest'
         run: docker exec ${container_name} apk add bash
 
-      - run: docker exec ${container_name} arch
+      - run: docker exec ${container_name} sh -c "arch"
 
       - run: |
           chmod +x qi.bash
