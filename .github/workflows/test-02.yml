@@ -36,7 +36,7 @@ jobs:
         run: >
           docker run --name ${container_name} -it -d -w /root -v ${{ github.workspace }}:/root
           --platform linux/${{ matrix.platform }}
-          ${{ matrix.qbt-container_image-cross-make }}
+          ${{ matrix.container_image }}
 
 
       - name: Run apk update
