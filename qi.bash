@@ -14,15 +14,14 @@ get_release_tag() {
 	local ver="${LIBTORRENT_VERSION:-v2}"
 
 	# Check required tools
-	if ! command -v curl > /dev/null; then
+	has_command curl || {
 		print_error "curl is required but not found"
 		exit 1
-	fi
-
-	if ! command -v jq > /dev/null; then
+	}
+	has_command jq || {
 		print_error "jq is required but not found"
 		exit 1
-	fi
+	}
 
 	# Fetch and parse API response
 	local response
@@ -31,45 +30,36 @@ get_release_tag() {
 		exit 1
 	}
 
-	if [[ -z $response ]]; then
+	[[ -n $response ]] || {
 		print_error "Empty response from GitHub API"
 		exit 1
-	fi
+	}
 
 	local release_tag
 	case "$ver" in
-		v1)
-			release_tag=$(echo "$response" | jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_1_2)"' 2> /dev/null) || {
-				print_error "Failed to parse release information for LibTorrent v1"
-				exit 1
-			}
-			;;
-		v2)
-			release_tag=$(echo "$response" | jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_2_0)"' 2> /dev/null) || {
-				print_error "Failed to parse release information for LibTorrent v2"
-				exit 1
-			}
-			;;
+		v1) release_tag=$(echo "$response" | jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_1_2)"' 2> /dev/null) ;;
+		v2) release_tag=$(echo "$response" | jq -r '. | "release-\(.qbittorrent)_v\(.libtorrent_2_0)"' 2> /dev/null) ;;
 		*)
 			print_error "Invalid LibTorrent version: $ver"
 			exit 1
 			;;
 	esac
 
-	if [[ -z $release_tag || $release_tag == "null" ]]; then
+	[[ -n $release_tag && $release_tag != "null" ]] || {
 		print_error "Failed to determine release tag from API response"
 		exit 1
-	fi
+	}
 
 	echo "$release_tag"
 }
 
 # Detect architecture and map to binary name
 detect_arch() {
-	command -v arch > /dev/null || {
+	has_command arch || {
 		print_error "arch command not found"
 		exit 1
 	}
+
 	case "$(arch)" in
 		x86_64 | amd64) echo "x86_64" ;;
 		i?86 | x86) echo "x86" ;;
@@ -83,17 +73,46 @@ detect_arch() {
 	esac
 }
 
+# Check if command exists
+has_command() {
+	command -v "$1" > /dev/null
+}
+
 # Download file using available tool
 download() {
 	local url="$1" output="$2"
 	print_info "Downloading: $url"
-	if command -v wget > /dev/null; then
+
+	if has_command wget; then
 		wget -qO "$output" "$url"
-	elif command -v curl > /dev/null; then
+	elif has_command curl; then
 		curl -sL -o "$output" "$url"
 	else
 		print_error "Neither wget nor curl available"
 		exit 1
+	fi
+}
+
+# Validate architecture is supported for download
+validate_arch() {
+	local arch="$1"
+	case "$arch" in
+		x86_64 | x86 | aarch64 | armv7 | armhf) print_info "Architecture validated: $arch" ;;
+		*)
+			print_error "Unsupported architecture for download: $arch"
+			print_error "Supported architectures: x86_64, x86, aarch64, armv7, armhf"
+			exit 1
+			;;
+	esac
+}
+
+# Get checksum of file
+get_checksum() {
+	local file="$1"
+	if has_command sha256sum; then
+		sha256sum "$file" | cut -d' ' -f1
+	elif has_command shasum; then
+		shasum -a 256 "$file" | cut -d' ' -f1
 	fi
 }
 
@@ -112,22 +131,12 @@ main() {
 	[[ -n ${FORCE_ARCH:-} ]] && print_warn "Forcing architecture: $arch (was: $(detect_arch))"
 
 	print_info "Architecture: $arch"
-	print_info "Download tool: $(command -v wget > /dev/null && echo wget || echo curl)"
+	print_info "Download tool: $(has_command wget && echo wget || echo curl)"
 	print_info "LibTorrent version: $libtorrent_ver"
 	print_info "Release tag: $release_tag"
-	print_info "Attestation verification: $(command -v gh > /dev/null && echo "enabled" || echo "disabled (gh cli not found)")"
+	print_info "Attestation verification: $(has_command gh && echo "enabled" || echo "disabled (gh cli not found)")"
 
-	# Validate architecture is supported
-	case "$arch" in
-		x86_64 | x86 | aarch64 | armv7 | armhf)
-			print_info "Architecture validated: $arch"
-			;;
-		*)
-			print_error "Unsupported architecture for download: $arch"
-			print_error "Supported architectures: x86_64, x86, aarch64, armv7, armhf"
-			exit 1
-			;;
-	esac
+	validate_arch "$arch"
 
 	local binary_name="${arch}-qbittorrent-nox"
 	local url="https://github.com/userdocs/qbittorrent-nox-static/releases/download/${release_tag}/${binary_name}"
@@ -139,7 +148,7 @@ main() {
 	}
 
 	chmod 755 "$install_path"
-	[[ ! -s $install_path ]] && {
+	[[ -s $install_path ]] || {
 		print_error "Downloaded file is empty"
 		exit 1
 	}
@@ -147,18 +156,12 @@ main() {
 	print_info "Installation complete: $install_path"
 
 	# Show file checksum
-	if command -v sha256sum > /dev/null; then
-		local checksum
-		checksum=$(sha256sum "$install_path" | cut -d' ' -f1)
-		print_info "SHA256: $checksum"
-	elif command -v shasum > /dev/null; then
-		local checksum
-		checksum=$(shasum -a 256 "$install_path" | cut -d' ' -f1)
-		print_info "SHA256: $checksum"
-	fi
+	local checksum
+	checksum=$(get_checksum "$install_path")
+	[[ -n $checksum ]] && print_info "SHA256: $checksum"
 
 	# Verify attestations if GitHub CLI is available
-	if command -v gh > /dev/null; then
+	if has_command gh; then
 		print_info "Verifying attestations with GitHub CLI..."
 		if gh attestation verify "$install_path" --repo userdocs/qbittorrent-nox-static 2> /dev/null; then
 			print_info "✓ Attestations verified successfully"
@@ -206,11 +209,11 @@ while [[ $# -gt 0 ]]; do
 			;;
 		--check)
 			echo "Architecture: $(detect_arch)"
-			echo "Download tool: $(command -v wget > /dev/null && echo wget || echo curl)"
+			echo "Download tool: $(has_command wget && echo wget || echo curl)"
 			echo "LibTorrent version: ${LIBTORRENT_VERSION:-v2}"
 			echo "Release tag: $(get_release_tag)"
 			echo "Base URL: https://github.com/userdocs/qbittorrent-nox-static/releases/download/$(get_release_tag)"
-			echo "GitHub CLI: $(command -v gh > /dev/null && echo "available (attestations will be verified)" || echo "not available")"
+			echo "GitHub CLI: $(has_command gh && echo "available (attestations will be verified)" || echo "not available")"
 			exit 0
 			;;
 		--help | -h)
