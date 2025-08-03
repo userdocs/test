@@ -52,11 +52,11 @@ jobs:
 
       - name: Run apk update
         if: matrix.container_image == 'ubuntu:latest'
-        run: docker exec ${container_name} apt-get update && apt-get install -y wget
+        run: docker exec ${container_name} sudo apt-get update && sudo apt-get install -y wget
 
       - name: Run apk update
         if: matrix.container_image == 'debian:latest'
-        run: docker exec ${container_name} apt-get update && apt-get install -y wget
+        run: docker exec ${container_name} sudo apt-get update && sudo apt-get install -y wget
 
       - name: Run apk update
         if: matrix.container_image == 'rockylinux:latest'
