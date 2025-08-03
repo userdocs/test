@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest-arm
+    runs-on: ubuntu-24.04-arm
     container:
       image: ${{ matrix.container_image }}
       options: --platform linux/${{ matrix.platform }}
