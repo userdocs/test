@@ -14,10 +14,10 @@ jobs:
       matrix:
         platform: ["amd64", "arm/v6", "arm/v7", "arm64", "i386", "riscv64", "mips64le", "ppc64le", "s390x"]
         container_image: [
-          # "ubuntu:latest",
-          # "debian:latest",
-          "alpine:latest"
-          # "rockylinux:latest",
+          "ubuntu:latest",
+          "debian:latest",
+          "alpine:latest",
+          "rockylinux:latest"
           # "almalinux:latest",
           # "opensuse/leap:latest",
           # "fedora:latest",
@@ -36,6 +36,8 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+
+      - run: ls /lib/*
 
       - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
         run: >
