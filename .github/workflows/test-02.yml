@@ -69,13 +69,13 @@ jobs:
         run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
 
       - run: |
-          printf '\n%b\n' '\`\`\`bash' | tee -a $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} bash -c 'ls /lib/ | grep -E "*-*"' | tee -a $GITHUB_STEP_SUMMARY
-          printf '\n%b\n' '\`\`\`' | tee -a $GITHUB_STEP_SUMMARY
+          printf '\n%b\n' '\`\`\`bash' >> $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} bash -c 'ls /lib/' | tee -a $GITHUB_STEP_SUMMARY
+          printf '\n%b\n' '\`\`\`' >> $GITHUB_STEP_SUMMARY
 
       - run: |
           chmod +x qi.bash
-          printf '\n%b\n' '\`\`\`bash' | tee -a $GITHUB_STEP_SUMMARY
+          printf '\n%b\n' '\`\`\`bash' >> $GITHUB_STEP_SUMMARY
           docker exec ${container_name} bash qi.bash | tee -a $GITHUB_STEP_SUMMARY
-          printf '\n%b\n' '\`\`\`' | tee -a $GITHUB_STEP_SUMMARY
+          printf '\n%b\n' '\`\`\`' >> $GITHUB_STEP_SUMMARY
 
