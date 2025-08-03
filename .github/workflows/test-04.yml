@@ -32,7 +32,7 @@ jobs:
           - arch: riscv64
             platform: linux/riscv64
         exclude:
-          - arch: i386
+          - arch: arm32v6
             container_image: ubuntu:latest
           - arch: riscv64
             container_image: debian:latest
