@@ -1,6 +1,6 @@
 #!/bin/bash
 # qBittorrent-nox Static Binary Installer
-set -euox pipefail
+set -euo pipefail
 
 # Colors
 RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' NC='\033[0m'
@@ -14,21 +14,30 @@ get_release_tag() {
 	local ver="${LIBTORRENT_VERSION:-v2}"
 
 	# Check required tools
-	has_command curl || {
-		print_error "curl is required but not found"
+	if ! has_command curl && ! has_command wget; then
+		print_error "Either curl or wget is required but neither was found"
+		print_error "Please install curl or wget to continue"
 		exit 1
-	}
+	fi
 	has_command jq || {
 		print_error "jq is required but not found"
+		print_error "Please install jq to continue"
 		exit 1
 	}
 
 	# Fetch and parse API response
 	local response
-	response=$(curl -sL "$api" 2> /dev/null) || {
-		print_error "Failed to fetch release information from GitHub API"
-		exit 1
-	}
+	if has_command curl; then
+		response=$(curl -sL "$api" 2> /dev/null) || {
+			print_error "Failed to fetch release information from GitHub API using curl"
+			exit 1
+		}
+	elif has_command wget; then
+		response=$(wget -qO- "$api" 2> /dev/null) || {
+			print_error "Failed to fetch release information from GitHub API using wget"
+			exit 1
+		}
+	fi
 
 	[[ -n $response ]] || {
 		print_error "Empty response from GitHub API"
@@ -84,11 +93,18 @@ download() {
 	print_info "Downloading: $url"
 
 	if has_command wget; then
-		wget -qO "$output" "$url"
+		wget -qO "$output" "$url" || {
+			print_error "Download failed using wget"
+			return 1
+		}
 	elif has_command curl; then
-		curl -sL -o "$output" "$url"
+		curl -sL -o "$output" "$url" || {
+			print_error "Download failed using curl"
+			return 1
+		}
 	else
-		print_error "Neither wget nor curl available"
+		print_error "Neither wget nor curl is available for downloading"
+		print_error "Please install either wget or curl to continue"
 		exit 1
 	fi
 }
