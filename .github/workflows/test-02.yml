@@ -73,17 +73,17 @@ jobs:
         run: docker exec ${container_name} gh --version
 
       - name: Run alpine apk --print-arch
-        if: matrix.container_image == 'alpine:latest'
+        if: matrix.container_image == 'alpine:edge'
         run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} apk --print-arch
+          docker exec ${container_name} bash -c 'apk --print-arch'
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Run debian dpkg --print-architecture
         if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
         run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} dpkg --print-architecture
+          docker exec ${container_name} bash -c 'dpkg --print-architecture'
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Run apt-get update
