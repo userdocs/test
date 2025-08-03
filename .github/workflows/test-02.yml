@@ -33,9 +33,6 @@ jobs:
             platform: linux/riscv64
           - arch: s390x
             platform: linux/s390x
-        exclude:
-          - platform: "mips64le"
-            container_image: "alpine:latest"
 
     env:
         container_name: "build"
