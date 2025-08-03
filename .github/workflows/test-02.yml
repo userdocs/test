@@ -17,7 +17,7 @@ jobs:
         container_image: [
           "ubuntu:latest",
           "debian:latest",
-          "alpine:latest"
+          "alpine:edge"
         ]
         include:
           - arch: amd64
