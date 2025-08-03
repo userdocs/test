@@ -12,15 +12,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ["amd64", "arm/v6", "arm/v7", "arm64", "i386", "riscv64", "mips64le", "ppc64le", "s390x"]
+        arch: [amd64, arm32v6, arm32v7, arm64v8, i386, riscv64, s390x]
+        include:
+          - arch: amd64
+            platform: linux/amd64
+          - arch: arm32v6
+            platform: linux/arm/v6
+          - arch: arm32v7
+            platform: linux/arm/v7
+          - arch: arm64v8
+            platform: linux/arm64
+          - arch: i386
+            platform: linux/i386
+          - arch: riscv64
+            platform: linux/riscv64
+          - arch: s390x
+            platform: linux/s390x
         container_image: [
           "ubuntu:latest",
           "debian:latest",
-          "alpine:latest",
-          "rockylinux:latest"
-          # "almalinux:latest",
-          # "opensuse/leap:latest",
-          # "fedora:latest",
+          "alpine:latest"
         ]
         exclude:
           - platform: "mips64le"
@@ -44,7 +55,7 @@ jobs:
           -w /root
           -v ${{ github.workspace }}:/root
           --platform linux/${{ matrix.platform }}
-          ${{ matrix.container_image }}
+          ${{ matrix.arch }}/${{ matrix.container_image }}
 
 
       - name: Run apk update
@@ -52,16 +63,8 @@ jobs:
         run: docker exec ${container_name} apk add bash
 
       - name: Run apk update
-        if: matrix.container_image == 'ubuntu:latest'
+        if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
         run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
-
-      - name: Run apk update
-        if: matrix.container_image == 'debian:latest'
-        run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
-
-      - name: Run apk update
-        if: matrix.container_image == 'rockylinux:latest'
-        run: docker exec ${container_name} yum install -y wget
 
       - run: docker exec ${container_name} bash -c 'ls /lib/*'
 
