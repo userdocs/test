@@ -41,7 +41,9 @@ jobs:
 
       - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
         run: >
-          docker run --name ${container_name} -it -d -w /root -v ${{ github.workspace }}:/root
+          docker run --name ${container_name} -it -d
+          -w /root
+          -v ${{ github.workspace }}:/root
           --platform linux/${{ matrix.platform }}
           ${{ matrix.container_image }}
 
@@ -52,11 +54,11 @@ jobs:
 
       - name: Run apk update
         if: matrix.container_image == 'ubuntu:latest'
-        run: docker exec ${container_name} sudo apt-get update && sudo apt-get install -y wget
+        run: docker exec ${container_name} apt-get update \&\& apt-get install -y wget
 
       - name: Run apk update
         if: matrix.container_image == 'debian:latest'
-        run: docker exec ${container_name} sudo apt-get update && sudo apt-get install -y wget
+        run: docker exec ${container_name} apt-get update \&\& apt-get install -y wget
 
       - name: Run apk update
         if: matrix.container_image == 'rockylinux:latest'
