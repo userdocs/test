@@ -70,7 +70,7 @@ jobs:
 
       - run: |
           printf '\n%b\n' '\`\`\`bash' | tee -a $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} bash -c 'ls /lib/ | grep -E "*-*" | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} bash -c 'ls /lib/ | grep -E "*-*"' | tee -a $GITHUB_STEP_SUMMARY
           printf '\n%b\n' '\`\`\`' | tee -a $GITHUB_STEP_SUMMARY
 
       - run: |
