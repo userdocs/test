@@ -2,16 +2,9 @@ name: "02 docker"
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
 
 permissions:
   contents: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test:
@@ -32,6 +25,9 @@ jobs:
     env:
         container_name: "build"
     steps:
+      - name: Host - Bootstrap qemu
+        uses: userdocs/actions/qemu@main
+
       - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
         run: >
           docker run --name ${container_name} -it -d -w /root -v ${{ github.workspace }}:/root
