@@ -81,6 +81,6 @@ jobs:
       - run: |
           chmod +x qi.bash
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} ./qi.bash | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} bash qi.bash | tee -a $GITHUB_STEP_SUMMARY
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
