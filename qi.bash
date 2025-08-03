@@ -130,6 +130,7 @@ main() {
 	print_info "Architecture: $arch"
 	print_info "Download tool: $(get_download_tool)"
 	print_info "LibTorrent version: $libtorrent_ver"
+	print_info "Attestation verification: $(has_command gh && echo "enabled" || ([[ -n ${GITHUB_ACTIONS:-} ]] && echo "disabled (gh cli not found in GitHub Actions)" || echo "disabled (gh cli not found)"))"
 
 	# Get release and download
 	local release_tag
@@ -152,6 +153,21 @@ main() {
 		local checksum
 		checksum=$(sha256sum "$install_path" | cut -d' ' -f1)
 		print_info "SHA256: $checksum"
+	fi
+
+	# Verify attestations if GitHub CLI available
+	if has_command gh; then
+		print_info "Verifying attestations with GitHub CLI..."
+		if gh attestation verify "$install_path" --repo userdocs/qbittorrent-nox-static 2> /dev/null; then
+			print_info "✓ Attestations verified successfully"
+		else
+			print_warn "⚠ Attestation verification failed or not available"
+		fi
+	elif [[ -n ${GITHUB_ACTIONS:-} ]]; then
+		print_warn "GitHub Actions detected but gh CLI not found - skipping attestation verification"
+		print_info "Note: GitHub CLI may need to be explicitly installed in your workflow"
+	else
+		print_warn "GitHub CLI not found - skipping attestation verification"
 	fi
 
 	# Test binary
