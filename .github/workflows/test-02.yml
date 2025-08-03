@@ -16,11 +16,6 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-24.04-arm
-    container:
-      image: ${{ matrix.container_image }}
-      options: --platform linux/${{ matrix.platform }}
-      # volumes:
-      #   - ${{ github.workspace }}:/root
     strategy:
       fail-fast: false
       matrix:
@@ -34,16 +29,24 @@ jobs:
           # "opensuse/leap:latest",
           # "fedora:latest",
         ]
+    env:
+        container_name: "build"
     steps:
+      - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
+        run: >
+          docker run --name ${container_name} -it -d -w /root -v ${{ github.workspace }}:/root
+          --platform linux/${{ matrix.platform }}
+          ${{ matrix.qbt-container_image-cross-make }}
 
 
-      - run: apk add bash
+      - name: Run apk update
         if: matrix.container_image == 'alpine:latest'
+        run: docker exec ${container_name} apk add bash
 
-      - run: arch | tee -a $GITHUB_STEP_SUMMARY
+      - run: docker exec ${container_name} arch | tee -a $GITHUB_STEP_SUMMARY
 
       - run: |
           curl -sLO "https://raw.githubusercontent.com/userdocs/test/refs/heads/main/qi.bash"
           chmod +x qi.bash
-          ./qi.bash
+          docker exec ${container_name} bash qi.bash
 
