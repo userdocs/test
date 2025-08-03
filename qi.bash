@@ -1,14 +1,6 @@
 #!/bin/bash
-# qBittorrent-nox Static Binary Insta	if [[ -n "$detected_arch" ]]; then
-		case "$detected_arch" in
-			x86_64 | amd64 | x86 | i386 | i686 | aarch64 | arm64 | armv7* | armv6* | riscv64 | armhf | armel)
-				: # Architecture is supported
-				;;
-			*)
-				errors+=("Unsupported architecture: $detected_arch. Supported: x86_64, x86, i386, i686, aarch64, armv7, armhf, riscv64")
-				;;
-		esac
-	fieuo pipefail
+# qBittorrent-nox Static Binary Installer
+set -euo pipefail
 
 # Colors
 RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' NC='\033[0m'
@@ -57,11 +49,11 @@ validate_system() {
 
 	if [[ -n $detected_arch ]]; then
 		case "$detected_arch" in
-			x86_64 | amd64 | x86 | aarch64 | arm64 | armv7* | armv6* | riscv64 | armhf | armel)
+			x86_64 | amd64 | x86 | i386 | i686 | aarch64 | arm64 | armv7* | armv6* | riscv64 | armhf | armel)
 				: # Architecture is supported
 				;;
 			*)
-				errors+=("Unsupported architecture: $detected_arch. Supported: x86_64, x86, aarch64, armv7, armhf, riscv64")
+				errors+=("Unsupported architecture: $detected_arch. Supported: x86_64, x86, i386, i686, aarch64, armv7, armhf, riscv64")
 				;;
 		esac
 	fi
