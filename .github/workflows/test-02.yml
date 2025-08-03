@@ -19,8 +19,8 @@ jobs:
     container:
       image: ${{ matrix.container_image }}
       options: --platform linux/${{ matrix.platform }}
-      volumes:
-        - ${{ github.workspace }}:/root
+      # volumes:
+      #   - ${{ github.workspace }}:/root
     strategy:
       fail-fast: false
       matrix:
