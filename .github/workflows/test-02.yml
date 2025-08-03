@@ -37,7 +37,6 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - run: ls /lib/*
 
       - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
         run: >
@@ -54,17 +53,20 @@ jobs:
 
       - name: Run apk update
         if: matrix.container_image == 'ubuntu:latest'
-        run: docker exec ${container_name} apt-get update \&\& apt-get install -y wget
+        run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
 
       - name: Run apk update
         if: matrix.container_image == 'debian:latest'
-        run: docker exec ${container_name} apt-get update \&\& apt-get install -y wget
+        run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
 
       - name: Run apk update
         if: matrix.container_image == 'rockylinux:latest'
         run: docker exec ${container_name} yum install -y wget
 
-      - run: docker exec ${container_name} sh -c "arch"
+      - run: docker exec ${container_name} bash -c 'ls /lib/*'
+
+
+      - run: docker exec ${container_name} arch
 
       - run: |
           chmod +x qi.bash
