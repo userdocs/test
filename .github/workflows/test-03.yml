@@ -8,11 +8,12 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        arch: [amd64, arm32v6, arm32v7, arm64v8, i386, riscv64]
+        runs-on: ["ubuntu-24.04", "ubuntu-24.04-arm"]
+        arch: ["amd64", "arm32v6", "arm32v7", "arm64v8", "i386", "riscv64"]
         container_image: [
           "ubuntu:latest",
           "debian:latest",
@@ -62,15 +63,15 @@ jobs:
 
       - name: Run alpine
         if: matrix.container_image == 'alpine:latest'
-        run: docker exec ${container_name} apk add bash github-cli
+        run: |
+          printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} apk --print-arch
+          printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Run debian
         if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
-        run: docker exec ${container_name} bash -c 'apt-get update && apt-get install -y wget'
-
-      - run: |
-          chmod +x qi.bash
+        run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} qi.bash | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} dpkg --print-architecture
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
