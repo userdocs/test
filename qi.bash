@@ -40,11 +40,11 @@ validate_system() {
 	# Validate architecture if arch command exists
 	if has_command arch; then
 		case "$(arch)" in
-			x86_64 | amd64 | i?86 | x86 | aarch64 | arm64 | armv7* | armv6*)
+			x86_64 | amd64 | x86 | aarch64 | arm64 | armv7* | armv6* | riscv64)
 				: # Architecture is supported
 				;;
 			*)
-				errors+=("Unsupported architecture: $(arch). Supported: x86_64, x86, aarch64, armv7, armhf")
+				errors+=("Unsupported architecture: $(arch). Supported: x86_64, x86, aarch64, armv7, armhf, riscv64")
 				;;
 		esac
 	fi
@@ -86,10 +86,11 @@ get_download_tool() {
 detect_arch() {
 	case "$(arch)" in
 		x86_64 | amd64) echo "x86_64" ;;
-		i?86 | x86) echo "x86" ;;
+		x86) echo "x86" ;;
 		aarch64 | arm64) echo "aarch64" ;;
 		armv7*) echo "armv7" ;;
 		armv6*) echo "armhf" ;;
+		riscv64) echo "riscv64" ;;
 	esac
 }
 
@@ -97,12 +98,12 @@ detect_arch() {
 validate_arch() {
 	local arch="$1"
 	case "$arch" in
-		x86_64 | x86 | aarch64 | armv7 | armhf)
+		x86_64 | x86 | aarch64 | armv7 | armhf | riscv64)
 			print_info "Architecture validated: $arch"
 			;;
 		*)
 			print_error "Architecture '$arch' not supported for binary download"
-			print_error "Supported: x86_64, x86, aarch64, armv7, armhf"
+			print_error "Supported: x86_64, x86, aarch64, armv7, armhf, riscv64"
 			exit 1
 			;;
 	esac
@@ -301,7 +302,7 @@ Usage: $0 [OPTIONS]
 
 Options:
   --check              Show system information
-  --force-arch ARCH    Force architecture (x86, x86_64, armhf, armv7, aarch64)
+  --force-arch ARCH    Force architecture (x86, x86_64, armhf, armv7, aarch64, riscv64)
   --libtorrent VER     LibTorrent version (v1, v2, 1, 2) [default: v2]
   --help               Show this help
 
