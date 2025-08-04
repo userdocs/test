@@ -76,5 +76,5 @@ jobs:
         run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
           docker exec ${container_name} gh --version | tee -a $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} file gh | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} file $(which gh) | tee -a $GITHUB_STEP_SUMMARY
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
