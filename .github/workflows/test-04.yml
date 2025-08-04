@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ${{ matrix.runs-on }}
     container:
-      image: ${{ matrix.arch }}/${{ matrix.container_image }}
+      image: ${{ matrix.container_image }}
       options: --platform ${{ matrix.platform }}
     strategy:
       fail-fast: false
