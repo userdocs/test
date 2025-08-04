@@ -60,20 +60,21 @@ jobs:
         if: matrix.container_image == 'alpine:latest'
         run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} apk update | tee -a $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} apk add github-cli | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} apk update
+          docker exec ${container_name} apk add github-cli file
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Run debian
         if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
         run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} apt-get update | tee -a $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} apt-get install -y gh | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} apt-get update
+          docker exec ${container_name} apt-get install -y gh
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Run gh-cli
         run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
           docker exec ${container_name} gh --version | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} file | tee -a $GITHUB_STEP_SUMMARY
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
