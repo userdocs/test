@@ -181,6 +181,121 @@ create_sha256() {
 		return 1
 	fi
 }
+
+# Comprehensive SHA256 verification function
+# Tries GitHub CLI first, then API, then shows local SHA as fallback
+verify_binary_integrity() {
+	local install_path="$1"
+	local release_tag="$2"
+	local arch="$3"
+	local repo="userdocs/qbittorrent-nox-static"
+
+	# Calculate local file SHA256
+	local local_sha
+	if ! local_sha=$(create_sha256 "$install_path"); then
+		print_warning "Could not calculate local SHA256 - skipping verification"
+		return 1
+	fi
+
+	print_info "SHA256: $local_sha"
+
+	# Try GitHub CLI attestation verification first (most secure)
+	if check_gh_cli; then
+		print_info "Verifying with GitHub CLI attestations..."
+		if gh attestation verify "$install_path" --repo "$repo" 2> /dev/null; then
+			print_success "✓ GitHub CLI attestation verification passed"
+			return 0
+		else
+			print_warning "⚠ GitHub CLI attestation verification failed or not available"
+			print_info "Falling back to GitHub API verification..."
+		fi
+	else
+		if [[ -n ${GITHUB_ACTIONS:-} ]]; then
+			print_info "GitHub Actions detected but gh CLI not found"
+			print_info "Note: GitHub CLI may need to be explicitly installed in your workflow"
+			print_info "Note: GH_TOKEN environment variable is also required for attestation verification"
+		else
+			print_info "GitHub CLI not found - trying GitHub API verification..."
+		fi
+	fi
+
+	# Try GitHub API verification as fallback
+	local api_url="https://api.github.com/repos/${repo}/releases/tags/${release_tag}"
+	local tool
+	tool=$(check_download_tools)
+
+	# Check if jq is available for JSON parsing
+	if ! command -v jq > /dev/null 2>&1; then
+		print_warning "jq not found - skipping GitHub API SHA256 verification"
+		print_info "Install jq for enhanced verification: apt-get install jq (Debian/Ubuntu) or apk add jq (Alpine)"
+		print_info "Local SHA256 verification completed"
+		return 1
+	fi
+
+	print_info "Verifying SHA256 against GitHub API..."
+
+	# Fetch release assets from GitHub API
+	local api_response
+	case "$tool" in
+		wget)
+			api_response=$(wget -qO- "$api_url" 2> /dev/null) || {
+				print_warning "Failed to fetch release information from GitHub API"
+				print_info "Local SHA256 verification completed"
+				return 1
+			}
+			;;
+		curl)
+			api_response=$(curl -sL "$api_url" 2> /dev/null) || {
+				print_warning "Failed to fetch release information from GitHub API"
+				print_info "Local SHA256 verification completed"
+				return 1
+			}
+			;;
+	esac
+
+	if [[ -z $api_response ]]; then
+		print_warning "Empty response from GitHub API"
+		print_info "Local SHA256 verification completed"
+		return 1
+	fi
+
+	# Extract SHA256 digests from API response
+	local api_digests
+	api_digests=$(printf '%s' "$api_response" | jq -r '.assets[].digest.sha256 // empty' 2> /dev/null)
+
+	if [[ -z $api_digests ]]; then
+		print_warning "No SHA256 digests found in GitHub API response"
+		print_info "This may be normal for older releases or if digests are not published"
+		print_info "Local SHA256 verification completed"
+		return 1
+	fi
+
+	# Check if local SHA256 matches any of the API digests
+	local match_found=false
+	while IFS= read -r api_digest; do
+		if [[ -n $api_digest ]] && [[ $local_sha == "$api_digest" ]]; then
+			match_found=true
+			break
+		fi
+	done <<< "$api_digests"
+
+	if [[ $match_found == "true" ]]; then
+		print_success "✓ GitHub API SHA256 verification passed"
+		return 0
+	else
+		print_warning "⚠ GitHub API SHA256 verification failed"
+		print_warning "Local SHA256:  $local_sha"
+		print_warning "API Digests:"
+		while IFS= read -r api_digest; do
+			if [[ -n $api_digest ]]; then
+				print_warning "  $api_digest"
+			fi
+		done <<< "$api_digests"
+		print_warning "This may indicate a corrupted download or outdated API data"
+		print_info "Local SHA256 verification completed"
+		return 1
+	fi
+}
 # Get release tag from API
 get_release_tag() {
 	local api="https://github.com/userdocs/qbittorrent-nox-static/releases/latest/download/dependency-version.json"
@@ -266,34 +381,6 @@ download() {
 		exit 1
 	fi
 }
-
-# GitHub CLI function to verify binaries
-verify_with_gh_cli() {
-	local install_path="$1"
-	local repo="userdocs/qbittorrent-nox-static"
-
-	if check_gh_cli; then
-		print_info "Verifying attestations with GitHub CLI..."
-		if gh attestation verify "$install_path" --repo "$repo" 2> /dev/null; then
-			print_success "✓ Attestations verified successfully"
-			return 0
-		else
-			print_warning "⚠ Attestation verification failed or not available"
-			print_warning "This may be normal for older releases or if attestations are not yet available"
-			return 1
-		fi
-	else
-		if [[ -n ${GITHUB_ACTIONS:-} ]]; then
-			print_warning "GitHub Actions detected but gh CLI not found - skipping attestation verification"
-			print_info "Note: GitHub CLI may need to be explicitly installed in your workflow"
-			print_info "Note: GH_TOKEN environment variable is also required for attestation verification"
-		else
-			print_warning "GitHub CLI not found - skipping attestation verification"
-			print_info "Note: Install gh CLI and run 'gh auth login' for attestation verification"
-		fi
-		return 1
-	fi
-}
 # Main installation
 main() {
 	# Check if running on supported distribution
@@ -330,14 +417,8 @@ main() {
 
 	print_success "Installation complete: $install_path"
 
-	# Show checksum if available
-	local checksum
-	if checksum=$(create_sha256 "$install_path"); then
-		print_info "SHA256: $checksum"
-	fi
-
-	# Verify attestations if GitHub CLI available
-	verify_with_gh_cli "$install_path"
+	# Verify binary integrity (SHA256 + attestations)
+	verify_binary_integrity "$install_path" "$release_tag" "$arch"
 
 	# Test binary
 	if "$install_path" --version > /dev/null 2>&1; then
