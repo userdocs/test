@@ -69,12 +69,12 @@ jobs:
         run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
           docker exec ${container_name} apt-get update
-          docker exec ${container_name} apt-get install -y gh
+          docker exec ${container_name} apt-get install -y gh file
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Run gh-cli
         run: |
           printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
           docker exec ${container_name} gh --version | tee -a $GITHUB_STEP_SUMMARY
-          docker exec ${container_name} file | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} file gh | tee -a $GITHUB_STEP_SUMMARY
           printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
