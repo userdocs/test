@@ -1,4 +1,4 @@
-name: "04 docker"
+name: "03 docker"
 
 on:
   workflow_dispatch:
@@ -9,17 +9,15 @@ permissions:
 jobs:
   test:
     runs-on: ${{ matrix.runs-on }}
-    container:
-      image: ${{ matrix.container_image }}
-      options: --platform ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
-        runs-on: ["ubuntu-24.04-arm"]
+        runs-on: ["ubuntu-24.04", "ubuntu-24.04-arm"]
         arch: ["amd64", "arm32v6", "arm32v7", "arm64v8", "i386", "riscv64"]
         container_image: [
           "ubuntu:latest",
-          "alpine:edge"
+          "debian:latest",
+          "alpine:latest"
         ]
         include:
           - arch: amd64
@@ -35,6 +33,8 @@ jobs:
           - arch: riscv64
             platform: linux/riscv64
         exclude:
+          - arch: i386
+            container_image: ubuntu:latest
           - arch: arm32v6
             container_image: ubuntu:latest
           - arch: riscv64
@@ -45,17 +45,30 @@ jobs:
     env:
         container_name: "build"
     steps:
-      - name: Run alpine
-        if: matrix.container_image == 'alpine:edge'
-        run: |
-          apk update
-          apk add bash github-cli file
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Run debian/ubuntu
+      - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
+        run: >
+          docker run --name ${container_name} -it -d
+          -w /root
+          -v ${{ github.workspace }}:/root
+          --platform ${{ matrix.platform }}
+          ${{ matrix.arch }}/${{ matrix.container_image }}
+
+      - name: Run alpine
+        if: matrix.container_image == 'alpine:latest'
+        run: |
+          printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} apk update | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} apk add github-cli | tee -a $GITHUB_STEP_SUMMARY
+          printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Run debian
         if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
         run: |
-          apt update
-          apt install gh
+          printf '\n%b\n' "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} apt-get -update | tee -a $GITHUB_STEP_SUMMARY
+          docker exec ${container_name} apt-get install -y gh | tee -a $GITHUB_STEP_SUMMARY
+          printf '\n%b\n' "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-      - name: gh --version
-        run: gh --version
