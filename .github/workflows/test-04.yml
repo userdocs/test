@@ -48,14 +48,14 @@ jobs:
       - name: Run alpine
         if: matrix.container_image == 'alpine:edge'
         run: |
-          docker exec ${container_name} apk update
-          docker exec ${container_name} apk add bash github-cli file
+          apk update
+          apk add bash github-cli file
 
       - name: Run debian/ubuntu
         if: matrix.container_image == 'debian:latest' || matrix.container_image == 'ubuntu:latest'
         run: |
-          docker exec ${container_name} apt update
-          docker exec ${container_name} apt install gh
+          apt update
+          apt install gh
 
       - name: gh --version
-        run: docker exec ${container_name} gh --version
+        run: gh --version
