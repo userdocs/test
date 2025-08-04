@@ -224,14 +224,6 @@ verify_binary_integrity() {
 	local tool
 	tool=$(check_download_tools)
 
-	# Check if jq is available for JSON parsing
-	if ! command -v jq > /dev/null 2>&1; then
-		print_warning "jq not found - skipping GitHub API SHA256 verification"
-		print_info "Install jq for enhanced verification: apt-get install jq (Debian/Ubuntu) or apk add jq (Alpine)"
-		print_info "Local SHA256 verification completed"
-		return 1
-	fi
-
 	print_info "Verifying SHA256 against GitHub API..."
 
 	# Fetch release assets from GitHub API
@@ -261,7 +253,13 @@ verify_binary_integrity() {
 
 	# Extract SHA256 digests from API response
 	local api_digests
-	api_digests=$(printf '%s' "$api_response" | jq -r '.assets[].digest.sha256 // empty' 2> /dev/null)
+	if command -v jq > /dev/null 2>&1; then
+		# Use jq if available (preferred method) - extract just the hash value
+		api_digests=$(printf '%s' "$api_response" | jq -r '.assets[].digest.sha256 // empty' 2> /dev/null | sed 's/^sha256://')
+	else
+		# Fall back to sed if jq is not available - extract just the hash value
+		api_digests=$(printf '%s' "$api_response" | sed -rn 's|(.*)sha256:([^"]*)".*|\2|p' 2> /dev/null)
+	fi
 
 	if [[ -z $api_digests ]]; then
 		print_warning "No SHA256 digests found in GitHub API response"
