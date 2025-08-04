@@ -45,23 +45,6 @@ jobs:
     env:
         container_name: "build"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
-        run: >
-          docker run --name ${container_name} -it -d
-          -w /root
-          -v ${{ github.workspace }}:/root
-          -e "GH_TOKEN=${{ github.token }}"
-          --platform ${{ matrix.platform }}
-          ${{ matrix.arch }}/${{ matrix.container_image }}
-
       - name: Run alpine
         if: matrix.container_image == 'alpine:edge'
         run: |
