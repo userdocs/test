@@ -1,32 +1,77 @@
 #!/bin/bash
-# quick installer for qbitorrent-nox-static
-set -euo pipefail
+# Quick installer for qbittorrent-nox-static
+# This script is focused on being a simple installer that verifies installation and binaries
+
+# Error handling function to test commands and exit with helpful explanations
+handle_error() {
+	local exit_code="$1"
+	local command="$2"
+	local context="$3"
+
+	if [[ $exit_code -ne 0 ]]; then
+		print_failure "Command failed: $command"
+		print_error "Context: $context"
+		print_error "Exit code: $exit_code"
+		print_error "This error occurred during the installation process."
+		print_error "Please check your system configuration and try again."
+		exit "$exit_code"
+	fi
+}
 
 # Check supported distributions
 check_supported_distro() {
 	# Source os-release and check ID
 	if [[ -f /etc/os-release ]]; then
+		# shellcheck source=/etc/os-release
 		source /etc/os-release
-		case "${ID:-}" in
-			alpine | debian | ubuntu)
-				return 0 # Supported distributions
-				;;
-			*)
-				print_error "Unsupported distribution: ${ID:-unknown}. This installer only supports Alpine, Debian, and Ubuntu"
-				exit 1
-				;;
-		esac
+		# Support Alpine or Debian-based distributions
+		if [[ ${ID:-} =~ ^(alpine|debian)$ ]] || [[ ${ID_LIKE:-} == *debian* ]]; then
+			return 0 # Supported distribution
+		else
+			print_error "Unsupported distribution: ${ID:-unknown}. This installer only supports Alpine or Debian-based distributions"
+			exit 1
+		fi
 	else
-		print_error "Cannot determine distribution. This installer only supports Alpine, Debian, and Ubuntu"
+		print_error "Cannot determine distribution. /etc/os-release not found"
+		print_error "This installer only supports Alpine or Debian-based distributions"
 		exit 1
 	fi
 }
 
-# Colors
-RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' NC='\033[0m'
-print_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-print_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+# Output functions for user feedback
+# Handle [INFO] (blue) [WARNING] (yellow) [ERROR] (red) [SUCCESS] (Green) [FAILURE] (magenta)
+print_output() {
+	local type="$1"
+	local message="$2"
+
+	case "$type" in
+		INFO)
+			printf '%b[INFO]%b %s\n' '\033[0;34m' '\033[0m' "$message"
+			;;
+		WARNING)
+			printf '%b[WARNING]%b %s\n' '\033[1;33m' '\033[0m' "$message"
+			;;
+		ERROR)
+			printf '%b[ERROR]%b %s\n' '\033[0;31m' '\033[0m' "$message"
+			;;
+		SUCCESS)
+			printf '%b[SUCCESS]%b %s\n' '\033[0;32m' '\033[0m' "$message"
+			;;
+		FAILURE)
+			printf '%b[FAILURE]%b %s\n' '\033[0;35m' '\033[0m' "$message"
+			;;
+		*)
+			printf '%s\n' "$message"
+			;;
+	esac
+}
+
+# Convenience wrappers for common output types
+print_info() { print_output "INFO" "$1"; }
+print_warning() { print_output "WARNING" "$1"; }
+print_error() { print_output "ERROR" "$1"; }
+print_success() { print_output "SUCCESS" "$1"; }
+print_failure() { print_output "FAILURE" "$1"; }
 
 # Detect architecture and map to binary name
 detect_arch() {
@@ -34,117 +79,221 @@ detect_arch() {
 
 	# Try different architecture detection methods
 	# Prioritize distribution-specific tools for better accuracy
-	if command -v apk > /dev/null; then
-		arch_output="$(apk --print-arch 2> /dev/null || echo "")"
-	elif command -v dpkg > /dev/null; then
-		arch_output="$(dpkg --print-architecture 2> /dev/null || echo "")"
-	elif command -v arch > /dev/null; then
-		arch_output="$(arch)"
+	if command -v apk > /dev/null 2>&1; then
+		# Alpine Linux
+		arch_output="$(apk --print-arch 2> /dev/null)" || {
+			print_error "Failed to detect architecture using apk"
+			exit 1
+		}
+	elif command -v dpkg > /dev/null 2>&1; then
+		# Debian-based systems
+		arch_output="$(dpkg --print-architecture 2> /dev/null)" || {
+			print_error "Failed to detect architecture using dpkg"
+			exit 1
+		}
+	elif command -v arch > /dev/null 2>&1; then
+		# Fallback to arch command
+		arch_output="$(arch)" || {
+			print_error "Failed to detect architecture using arch command"
+			exit 1
+		}
 	else
-		print_error "No architecture detection tool found (arch/apk/dpkg)"
+		print_error "No architecture detection tool found (apk/dpkg/arch)"
+		print_error "Please install the appropriate package manager or set FORCE_ARCH environment variable"
 		exit 1
 	fi
 
 	case "$arch_output" in
 		# x86_64 = amd64, x86_64
-		x86_64 | amd64) echo "x86_64" ;;
+		x86_64 | amd64) printf '%s' "x86_64" ;;
 		# x86 = x86, i386, i686
-		x86 | i386 | i686) echo "x86" ;;
+		x86 | i386 | i686) printf '%s' "x86" ;;
 		# aarch64 = arm64, aarch64
-		aarch64 | arm64) echo "aarch64" ;;
+		aarch64 | arm64) printf '%s' "aarch64" ;;
 		# armv7 = armv7* (and armhf on Debian/Ubuntu)
-		armv7*) echo "armv7" ;;
+		armv7*) printf '%s' "armv7" ;;
 		# armhf = armhf (on Alpine = armv6), armv6*, armel
 		armhf)
 			# Alpine uses apk, Debian/Ubuntu use dpkg
-			if command -v apk > /dev/null; then
-				echo "armhf" # Alpine: armhf stays as armhf (armv6 binary)
+			if command -v apk > /dev/null 2>&1; then
+				printf '%s' "armhf" # Alpine: armhf stays as armhf (armv6 binary)
 			else
-				echo "armv7" # Debian/Ubuntu: armhf maps to armv7 binary
+				printf '%s' "armv7" # Debian/Ubuntu: armhf maps to armv7 binary
 			fi
 			;;
-		armv6* | armel) echo "armhf" ;;
+		armv6* | armel) printf '%s' "armhf" ;;
 		# riscv64 = riscv64
-		riscv64) echo "riscv64" ;;
+		riscv64) printf '%s' "riscv64" ;;
 		*)
 			print_error "Unsupported architecture: $arch_output"
+			print_error "Supported architectures: x86_64, x86, aarch64, armv7, armhf, riscv64"
+			print_error "You can override with FORCE_ARCH environment variable"
 			exit 1
 			;;
 	esac
 }
 
-# Get download tool
-get_download_tool() {
-	if command -v wget > /dev/null; then
-		echo "wget"
-	elif command -v curl > /dev/null; then
-		echo "curl"
+# Check for wget or curl, default to curl if present
+check_download_tools() {
+	if command -v curl > /dev/null 2>&1; then
+		printf '%s' "curl"
+	elif command -v wget > /dev/null 2>&1; then
+		printf '%s' "wget"
 	else
-		print_error "No download tool found (wget/curl)"
+		print_error "No download tool found. Please install curl or wget"
+		print_error "On Alpine: apk add curl"
+		print_error "On Debian/Ubuntu: apt-get install curl"
 		exit 1
 	fi
 }
 
+# Check if gh CLI is available
+check_gh_cli() {
+	if command -v gh > /dev/null 2>&1; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+# Create download function based on architecture checks
+create_download_url() {
+	local arch="$1"
+	local release_tag="$2"
+	printf '%s' "https://github.com/userdocs/qbittorrent-nox-static/releases/download/${release_tag}/${arch}-qbittorrent-nox"
+}
+
+# Create SHA256 checksum of downloaded file
+create_sha256() {
+	local file_path="$1"
+
+	if [[ ! -f $file_path ]]; then
+		print_error "File not found for checksum: $file_path"
+		return 1
+	fi
+
+	if command -v sha256sum > /dev/null 2>&1; then
+		sha256sum "$file_path" | cut -d' ' -f1
+	elif command -v shasum > /dev/null 2>&1; then
+		shasum -a 256 "$file_path" | cut -d' ' -f1
+	else
+		print_warning "No SHA256 tool found (sha256sum/shasum) - skipping checksum"
+		return 1
+	fi
+}
 # Get release tag from API
 get_release_tag() {
 	local api="https://github.com/userdocs/qbittorrent-nox-static/releases/latest/download/dependency-version.json"
 	local ver="${LIBTORRENT_VERSION:-v2}"
 	local tool
-	tool=$(get_download_tool)
+	tool=$(check_download_tools)
 
 	# Fetch API response
 	local response
 	case "$tool" in
 		wget)
-			response=$(wget -qO- "$api" 2> /dev/null)
+			response=$(wget -qO- "$api" 2> /dev/null) || {
+				handle_error $? "wget -qO- $api" "Failed to fetch release information from API"
+			}
 			;;
 		curl)
-			response=$(curl -sL "$api" 2> /dev/null)
+			response=$(curl -sL "$api" 2> /dev/null) || {
+				handle_error $? "curl -sL $api" "Failed to fetch release information from API"
+			}
 			;;
 	esac
 
 	if [[ -z $response ]]; then
-		print_error "Failed to fetch release information"
+		print_error "Failed to fetch release information - empty response"
+		print_error "API endpoint: $api"
 		exit 1
 	fi
 
 	# Parse release tag
 	local qbt_ver libt_ver
-	qbt_ver=$(echo "$response" | sed -rn 's|(.*)"qbittorrent": "(.*)",|\2|p')
+	qbt_ver=$(printf '%s' "$response" | sed -rn 's|(.*)"qbittorrent": "(.*)",|\2|p')
 
 	case "$ver" in
 		v1)
-			libt_ver=$(echo "$response" | sed -rn 's|(.*)"libtorrent_1_2": "(.*)",|\2|p')
+			libt_ver=$(printf '%s' "$response" | sed -rn 's|(.*)"libtorrent_1_2": "(.*)",|\2|p')
 			;;
 		v2)
-			libt_ver=$(echo "$response" | sed -rn 's|(.*)"libtorrent_2_0": "(.*)",|\2|p')
+			libt_ver=$(printf '%s' "$response" | sed -rn 's|(.*)"libtorrent_2_0": "(.*)",|\2|p')
 			;;
 		*)
 			print_error "Invalid LibTorrent version: $ver"
+			print_error "Valid options: v1, v2"
 			exit 1
 			;;
 	esac
 
-	echo "release-${qbt_ver}_v${libt_ver}"
+	if [[ -z $qbt_ver ]] || [[ -z $libt_ver ]]; then
+		print_error "Failed to parse version information from API response"
+		print_error "qBittorrent version: ${qbt_ver:-not found}"
+		print_error "LibTorrent version: ${libt_ver:-not found}"
+		exit 1
+	fi
+
+	printf '%s' "release-${qbt_ver}_v${libt_ver}"
 }
 
 # Download file
 download() {
-	local url="$1" output="$2"
+	local url="$1"
+	local output="$2"
 	local tool
-	tool=$(get_download_tool)
+	tool=$(check_download_tools)
 
 	print_info "Downloading: $url"
 	case "$tool" in
 		wget)
-			wget -qO "$output" "$url"
+			wget -qO "$output" "$url" || {
+				handle_error $? "wget -qO $output $url" "Failed to download binary"
+			}
 			;;
 		curl)
-			curl -sL -o "$output" "$url"
+			curl -sL -o "$output" "$url" || {
+				handle_error $? "curl -sL -o $output $url" "Failed to download binary"
+			}
 			;;
 	esac
+
+	# Verify download was successful
+	if [[ ! -f $output ]] || [[ ! -s $output ]]; then
+		print_failure "Download failed or file is empty: $output"
+		print_error "URL: $url"
+		print_error "Please check your internet connection and try again"
+		exit 1
+	fi
 }
 
+# GitHub CLI function to verify binaries
+verify_with_gh_cli() {
+	local install_path="$1"
+	local repo="userdocs/qbittorrent-nox-static"
+
+	if check_gh_cli; then
+		print_info "Verifying attestations with GitHub CLI..."
+		if gh attestation verify "$install_path" --repo "$repo" 2> /dev/null; then
+			print_success "✓ Attestations verified successfully"
+			return 0
+		else
+			print_warning "⚠ Attestation verification failed or not available"
+			print_warning "This may be normal for older releases or if attestations are not yet available"
+			return 1
+		fi
+	else
+		if [[ -n ${GITHUB_ACTIONS:-} ]]; then
+			print_warning "GitHub Actions detected but gh CLI not found - skipping attestation verification"
+			print_info "Note: GitHub CLI may need to be explicitly installed in your workflow"
+			print_info "Note: GH_TOKEN environment variable is also required for attestation verification"
+		else
+			print_warning "GitHub CLI not found - skipping attestation verification"
+			print_info "Note: Install gh CLI and run 'gh auth login' for attestation verification"
+		fi
+		return 1
+	fi
+}
 # Main installation
 main() {
 	# Check if running on supported distribution
@@ -158,63 +307,57 @@ main() {
 	local install_path="$HOME/bin/qbittorrent-nox"
 
 	print_info "Architecture: $arch"
-	print_info "Download tool: $(get_download_tool)"
+	print_info "Download tool: $(check_download_tools)"
 	print_info "LibTorrent version: $libtorrent_ver"
-	print_info "Attestation verification: $(command -v gh > /dev/null && echo "enabled" || echo "disabled (gh cli not found)")"
+	print_info "Attestation verification: $(check_gh_cli && printf '%s' "enabled" || printf '%s' "disabled (gh cli not found)")"
 
 	# Get release and download
 	local release_tag
 	release_tag=$(get_release_tag)
-	local url="https://github.com/userdocs/qbittorrent-nox-static/releases/download/${release_tag}/${arch}-qbittorrent-nox"
+	local url
+	url=$(create_download_url "$arch" "$release_tag")
 
-	mkdir -p "$HOME/bin"
+	# Create install directory
+	mkdir -p "$HOME/bin" || {
+		handle_error $? "mkdir -p $HOME/bin" "Failed to create installation directory"
+	}
+
+	# Download and install binary
 	download "$url" "$install_path"
-	chmod 755 "$install_path"
+	chmod 755 "$install_path" || {
+		handle_error $? "chmod 755 $install_path" "Failed to set executable permissions"
+	}
 
-	if [[ ! -s $install_path ]]; then
-		print_error "Download failed or file is empty"
-		exit 1
-	fi
-
-	print_info "Installation complete: $install_path"
+	print_success "Installation complete: $install_path"
 
 	# Show checksum if available
-	if command -v sha256sum > /dev/null; then
-		local checksum
-		checksum=$(sha256sum "$install_path" | cut -d' ' -f1)
+	local checksum
+	if checksum=$(create_sha256 "$install_path"); then
 		print_info "SHA256: $checksum"
 	fi
 
 	# Verify attestations if GitHub CLI available
-	if command -v gh > /dev/null; then
-		print_info "Verifying attestations with GitHub CLI..."
-		if gh attestation verify "$install_path" --repo userdocs/qbittorrent-nox-static 2> /dev/null; then
-			print_info "✓ Attestations verified successfully"
-		else
-			print_warn "⚠ Attestation verification failed or not available"
-		fi
-	elif [[ -n ${GITHUB_ACTIONS:-} ]]; then
-		print_warn "GitHub Actions detected but gh CLI not found - skipping attestation verification"
-		print_info "Note: GitHub CLI may need to be explicitly installed in your workflow"
-		print_info "Note: GH_TOKEN environment variable is also required for attestation verification"
-	else
-		print_warn "GitHub CLI not found - skipping attestation verification"
-		print_info "Note: Install gh CLI auth login for attestation verification"
-	fi
+	verify_with_gh_cli "$install_path"
 
 	# Test binary
 	if "$install_path" --version > /dev/null 2>&1; then
-		print_info "Version: $("$install_path" --version | head -1)"
+		local version_info
+		version_info=$("$install_path" --version | head -1)
+		print_success "Binary test passed"
+		print_info "Version: $version_info"
 	else
-		print_warn "Binary test failed"
+		print_warning "Binary test failed - the binary may not be compatible with your system"
+		print_warning "You may need to install additional dependencies"
 	fi
 
 	# PATH check
 	if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
-		print_warn '$HOME/bin is not in your PATH'
+		print_warning '$HOME/bin is not in your PATH'
 		print_info 'Add to ~/.bashrc: export PATH="$HOME/bin:$PATH"'
+		print_info 'Then run: source ~/.bashrc'
 	fi
 
+	print_success "Installation completed successfully!"
 	print_info "Run with: qbittorrent-nox"
 }
 
