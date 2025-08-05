@@ -12,12 +12,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: ["ubuntu-24.04"]
+        runs-on: ["ubuntu-24.04-arm"]
         arch: ["amd64", "arm32v6", "arm32v7", "arm64v8", "i386", "riscv64"]
         container_image: [
-          "ubuntu:latest",
-          "debian:latest",
-          "alpine:edge"
+          "ubuntu",
+          "debian",
+          "alpine"
         ]
         include:
           - arch: amd64
@@ -53,14 +53,16 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Create docker ${{ env.container_name }} ${{ matrix.container_image }} ${{ matrix.platform }} container
-        run: >
-          docker run --name ${container_name} -it -d
-          -w /root
-          -v ${{ github.workspace }}:/root
-          -e "GH_TOKEN=${{ github.token }}"
-          --platform ${{ matrix.platform }}
-          ${{ matrix.arch }}/${{ matrix.container_image }}
+
+      - uses: userdocs/actions/qbt_docker@main
+        with:
+            use_host_env: "false"
+            container_name: ${{ env.container_name }}
+            os_id: ${{ matrix.arch }}/${{ matrix.container_image }}
+            os_version_id: latest
+            custom_docker_commands: "--platform ${{ matrix.platform }} -e GH_TOKEN=${{ github.token }}"
+            additional_alpine_apps: "bash github-cli"
+            additional_debian_apps: "bash jq"
 
       - name: Run apk update
         if: matrix.container_image == 'alpine:edge'
