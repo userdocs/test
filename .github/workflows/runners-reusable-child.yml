@@ -1,0 +1,16 @@
+name: runners-reusable-child
+
+on:
+  workflow_call:
+    inputs:
+      runs_on:
+        type: string
+        required: true
+
+jobs:
+  runners:
+    runs-on: ${{ inputs.runs_on }}
+
+    steps:
+      - name: test
+        run: echo testing
