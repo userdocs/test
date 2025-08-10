@@ -1,0 +1,17 @@
+name: runners
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  runners:
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      matrix:
+        runs_on: [ubuntu-latest, macos-latest, macos-15, windows-latest, windows-2025]
+
+    steps:
+      - name: test
+        run: echo testing
