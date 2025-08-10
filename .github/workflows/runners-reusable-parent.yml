@@ -10,6 +10,10 @@ env:
 
 jobs:
   osx:
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
     strategy:
       matrix:
         runs_on: [ubuntu-latest, macos-latest, macos-15, windows-latest, windows-2025]
