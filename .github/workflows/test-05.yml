@@ -23,13 +23,7 @@ jobs:
             dockerfile: "https://gist.githubusercontent.com/userdocs/0b101572b78ebc2f80fc0c2061b932a1/raw/3386414d552855862e5336610903c3c8be355d93/Dockerfile" # use default Dockerfile from action
             additional_debian_apps: "curl git" # apt install this string
 
-      - name: Set qbt_docker outputs to environment
-        run: |
-          printf '%s\n' "container_name=${{ steps.qbt_docker.outputs.container_name }}" >> $GITHUB_ENV
-          printf '%s\n' "uid=${{ steps.qbt_docker.outputs.uid }}" >> $GITHUB_ENV
-          printf '%s\n' "wd=${{ steps.qbt_docker.outputs.wd }}" >> $GITHUB_ENV
-
-      - name: Set qbt_docker outputs to environment
+      - name: run image
         run: |
           docker exec $container_name env
 
@@ -45,12 +39,6 @@ jobs:
             dockerfile: "https://gist.githubusercontent.com/userdocs/0b101572b78ebc2f80fc0c2061b932a1/raw/3386414d552855862e5336610903c3c8be355d93/Dockerfile" # use default Dockerfile from action
             additional_debian_apps: "curl git" # apt install this string
 
-      - name: Set qbt_docker outputs to environment
-        run: |
-          printf '%s\n' "container_name=${{ steps.qbt_docker.outputs.container_name }}" >> $GITHUB_ENV
-          printf '%s\n' "uid=${{ steps.qbt_docker.outputs.uid }}" >> $GITHUB_ENV
-          printf '%s\n' "wd=${{ steps.qbt_docker.outputs.wd }}" >> $GITHUB_ENV
-
-      - name: Set qbt_docker outputs to environment
+      - name: run image
         run: |
           docker exec $container_name env
