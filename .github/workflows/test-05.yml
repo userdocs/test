@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest-arm
+    runs-on: ubuntu-24.04-arm
     env:
       container_name: "qbt-test-container"
     steps:
