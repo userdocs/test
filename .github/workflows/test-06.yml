@@ -45,54 +45,10 @@ jobs:
     name: ${{ matrix.runs_on }} - ${{ matrix.qbt_cross_name }}
 
     steps:
-      - name: determine host and target combination.
-        shell: bash
-        env:
-          runner_arch: ${{ runner.arch }}
-          guess_the_arch: ${{ matrix.qbt_cross_name }}
-        run: |
-          # Functions for consistent logging
-          log_info() {
-              printf '[INFO] %s\n' "$1"
-          }
-
-          log_error() {
-              printf '[ERROR] %s\n' "$1" >&2
-          }
-
-          log_debug() {
-              printf '[DEBUG] %s\n' "$1"
-          }
-
-          to_gh_env() {
-              printf '%s\n' "${1}" | tee -a "$GITHUB_ENV"
-          }
-
-          unset qemu_needed skip_qemu
-
-          case "${runner_arch}" in
-              X86 | X64)
-                  if [[ ${guess_the_arch} =~ ^(default|amd64|x86*|i386|i586|i686)$ ]]; then
-                      to_gh_env "skip_qemu=true"
-                      log_info skip_qemu=true
-                  fi
-                  ;;
-              ARM | ARM64)
-                  if [[ ${guess_the_arch} =~ ^(default|aarch64|arm.*)$ ]]; then
-                      to_gh_env "skip_qemu=true"
-                      log_info skip_qemu=true
-                  fi
-                  ;;
-          esac
-
-          if [[ $skip_qemu == 'true' ]]; then
-              printf '%s\n' "qemu_needed=no"
-              printf '%s\n' "qemu_target=${BASH_REMATCH[0]}"
-          fi
-
       - name: Host - Bootstrap qemu
-        if: env.qemu_needed != 'no'
         uses: userdocs/actions/qemu@main
+        with:
+          target_arch: ${{ matrix.qbt_cross_name }}
 
       - uses: userdocs/actions/qbt_docker@main
         id: qbt_docker
