@@ -47,32 +47,21 @@ jobs:
     steps:
       - name: determine host and target combination.
         shell: bash
+        env:
+          runner_arch: ${{ runner.arch }}
+          guess_the_arch: ${{ matrix.qbt_cross_name }}
         run: |
-          case "${{ runner.arch }}" in
-            X86 | X64)
-              if [[ -n "${{ matrix.qbt_cross_name }}" ]]; then
-                if [[ ${{ matrix.qbt_cross_name }} =~ ^(default|amd64|x86*|i386|i586|i686)$ ]]; then
-                  printf '%s\n' "qemu_needed=no" >> $GITHUB_ENV
-                fi
-              fi
+          unset qemu_needed
 
-              if [[ -n "${{ matrix.arch }}" ]]; then
-                if [[ "${{ matrix.arch }}" =~ ^(amd64|x86*|i386|i586|i686)$ ]]; then
-                  printf '%s\n' "qemu_needed=no" >> $GITHUB_ENV
-                fi
+          case "${runner_arch}" in
+            X86 | X64)
+              if [[ ${guess_the_arch} =~ ^(default|amd64|x86*|i386|i586|i686)$ ]]; then
+                printf '%s\n' "qemu_needed=no" >> $GITHUB_ENV
               fi
               ;;
             ARM | ARM64)
-              if [[ -n "${{ matrix.qbt_cross_name }}" ]]; then
-                if [[ "${{ matrix.qbt_cross_name }}" =~ ^(default|aarch64|arm*)$ ]]; then
-                  printf '%s\n' "qemu_needed=no" >> $GITHUB_ENV
-                fi
-              fi
-
-              if [[ -n "${{ matrix.arch }}" ]]; then
-                if [[ "${{ matrix.arch }}" =~ ^(arm64|aarch64|armv7*|armv6*|armv5*|arm*)$ ]]; then
-                  printf '%s\n' "qemu_needed=no" >> $GITHUB_ENV
-                fi
+              if [[ ${guess_the_arch} =~ ^(default|aarch64|arm*)$ ]]; then
+                printf '%s\n' "qemu_needed=no" >> $GITHUB_ENV
               fi
               ;;
           esac
