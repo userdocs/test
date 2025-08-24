@@ -42,7 +42,7 @@ jobs:
           - qbt_build_tool: ""
             qbt_qt_version_name: ""
 
-    name: ci host - ${{ matrix.runs_on }} - ${{ matrix.qbt_cross_name }} - ${{ matrix.qbt_libtorrent_version }} - ${{ matrix.qbt_build_tool }} - ${{ matrix.qbt_qt_version }}
+    name: ${{ matrix.runs_on }} - ${{ matrix.qbt_cross_name }}
 
     steps:
       - name: determine host and target combination.
