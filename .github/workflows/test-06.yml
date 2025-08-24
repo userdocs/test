@@ -48,7 +48,7 @@ jobs:
       - name: Host - Bootstrap qemu
         uses: userdocs/actions/qemu@main
         with:
-          target_arch: ${{ matrix.qbt_cross_name }}
+          target_arch: ${{ matrix.qbt_cross_name }} # takes the matrix array that is listing target architectures
 
       - uses: userdocs/actions/qbt_docker@main
         id: qbt_docker
