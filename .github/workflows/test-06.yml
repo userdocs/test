@@ -51,7 +51,7 @@ jobs:
           case "${{ runner.arch }}" in
             X86 | X64)
               if [[ -n "${{ matrix.qbt_cross_name }}" ]]; then
-                if [[ ${{ matrix.qbt_cross_name }} =~ ^(default|amd64|x86|x86_64|i386|i586|i686)$ ]]; then
+                if [[ ${{ matrix.qbt_cross_name }} =~ ^(default|amd64|x86*|i386|i586|i686)$ ]]; then
                   printf '%s\n' "qemu_needed=no" >> $GITHUB_ENV
                 fi
               fi
