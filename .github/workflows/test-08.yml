@@ -74,7 +74,7 @@ jobs:
 
       - name: DOCKER ENV TEST
         run: >
-          docker exec -w "${wd}/ninja" "${container_name}" env
+          docker exec "${container_name}" env
 
       - name: Host - Git clone ninja
         run: git clone --no-tags --single-branch --branch master --depth=1 "https://github.com/ninja-build/ninja.git" "ninja"
