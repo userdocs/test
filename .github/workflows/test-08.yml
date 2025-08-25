@@ -29,28 +29,6 @@ jobs:
             binary_name: armv6
           - arch_type: "armv7l-linux-musleabihf"
             binary_name: armv7
-          - arch_type: "i686-linux-musl"
-            binary_name: x86
-          - arch_type: "x86_64-linux-musl"
-            binary_name: x86_64
-          - arch_type: "mips-linux-musl"
-            binary_name: mips
-          - arch_type: "mips64-linux-musl"
-            binary_name: mips64
-          - arch_type: "mips64el-linux-musl"
-            binary_name: mips64el
-          - arch_type: "mipsel-linux-musl"
-            binary_name: mipsel
-          - arch_type: "powerpc-linux-musl"
-            binary_name: powerpc
-          - arch_type: "powerpc64le-linux-musl"
-            binary_name: powerpc64le
-          - arch_type: "s390x-linux-musl"
-            binary_name: s390x
-          - arch_type: "riscv64-linux-musl"
-            binary_name: riscv64
-          - arch_type: "loongarch64-linux-musl"
-            binary_name: loongarch64
 
     steps:
       - name: Host - checkout
