@@ -65,12 +65,12 @@ jobs:
 
       - name: Host - Bootstrap docker container
         uses: userdocs/actions/qbt_docker@testing
-        # env:
-        #   CPPFLAGS: "-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
-        #   LDFLAGS: "-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id"
         with:
             os_id: ghcr.io/userdocs/qbt-musl-cross-make
             os_version_id: ${{ matrix.arch_type }}
+            custom_docker_commands: |
+              -e LDFLAGS: "-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id"
+              -e CPPFLAGS: "-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
 
       - name: Host - Git clone ninja
         run: git clone --no-tags --single-branch --branch master --depth=1 "https://github.com/ninja-build/ninja.git" "ninja"
