@@ -81,7 +81,10 @@ jobs:
         run: mv -f ${{ github.workspace }}/ninja/build/ninja ninja-${{ matrix.binary_name }}
 
       - name: Host - crossbuild binary info via file
-        run: file ./ninja-${{ matrix.binary_name }} >> $GITHUB_STEP_SUMMARY
+        run: |
+          printf '%b\n' '```bash' | tee -a "$GITHUB_STEP_SUMMARY"
+          file ./ninja-${{ matrix.binary_name }} >> $GITHUB_STEP_SUMMARY
+          printf '%b\n' '```' | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Host - ninja-${{ matrix.binary_name }} --version
         run: ./ninja-${{ matrix.binary_name }} --version >> $GITHUB_STEP_SUMMARY
