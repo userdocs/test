@@ -56,7 +56,7 @@ jobs:
 
       - name: DOCKER LDFLAGS TEST
         run: >
-          docker exec "${container_name}" -c 'echo $LDFLAGS'
+          docker exec "${container_name}" bash -c 'echo $LDFLAGS'
 
       - name: Host - Git clone ninja
         run: git clone --no-tags --single-branch --branch master --depth=1 "https://github.com/ninja-build/ninja.git" "ninja"
