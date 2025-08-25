@@ -65,9 +65,9 @@ jobs:
 
       - name: Host - Bootstrap docker container
         uses: userdocs/actions/qbt_docker@testing
-        env:
-          CPPFLAGS: "-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
-          LDFLAGS: "-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id"
+        # env:
+        #   CPPFLAGS: "-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
+        #   LDFLAGS: "-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id"
         with:
             os_id: ghcr.io/userdocs/qbt-musl-cross-make
             os_version_id: ${{ matrix.arch_type }}
@@ -81,7 +81,7 @@ jobs:
 
       - name: DOCKER ENV TEST
         run: >
-          docker exec -w "${wd}/ninja" "${container_name}" cmake -B build
+          docker exec -w "${wd}/ninja" "${container_name}" env
 
       - name: Configure ninja
         run: >
