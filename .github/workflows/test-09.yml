@@ -1,4 +1,4 @@
-name: "08"
+name: "09"
 
 on:
   workflow_dispatch:
@@ -36,16 +36,17 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Host - Bootstrap qemu
-        uses: userdocs/actions/qemu@main
-        with:
-          target_arch: ${{ matrix.arch_type }}
+      # - name: Host - Bootstrap qemu
+      #   uses: userdocs/actions/qemu@main
+      #   with:
+      #     target_arch: ${{ matrix.arch_type }}
 
       - name: Host - Bootstrap docker container
         uses: userdocs/actions/qbt_docker@main
         with:
             os_id: ghcr.io/userdocs/qbt-musl-cross-make
             os_version_id: ${{ matrix.arch_type }}
+            additional_alpine_apps: "bash cmake git g++ make"
             custom_docker_commands: |
               -e LDFLAGS=-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id
               -e CPPFLAGS=-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3
@@ -59,33 +60,33 @@ jobs:
         run: >
           docker exec "${container_name}" bash -c 'echo $LDFLAGS'
 
-      - name: Host - Git clone ninja
-        run: git clone --no-tags --single-branch --branch master --depth=1 "https://github.com/ninja-build/ninja.git" "ninja"
+      # - name: Host - Git clone ninja
+      #   run: git clone --no-tags --single-branch --branch master --depth=1 "https://github.com/ninja-build/ninja.git" "ninja"
 
-      - name: Create tag env
-        working-directory: ninja
-        run: printf '%s\n' "ninja_github_tag=$(cat src/version.cc | sed -rn 's|const char\* kNinjaVersion = "(.*)";|\1|p' | sed 's/\.git//g')" >> $GITHUB_ENV
+      # - name: Create tag env
+      #   working-directory: ninja
+      #   run: printf '%s\n' "ninja_github_tag=$(cat src/version.cc | sed -rn 's|const char\* kNinjaVersion = "(.*)";|\1|p' | sed 's/\.git//g')" >> $GITHUB_ENV
 
-      - name: Configure ninja
-        run: >
-          docker exec -w "${wd}/ninja" "${container_name}" cmake -B build
-          -D CMAKE_BUILD_TYPE="Release"
-          -D CMAKE_CXX_STANDARD="20"
-          -D BUILD_TESTING=off
-          -D BUILD_GMOCK=off
-          -D INSTALL_GTEST=off
+      # - name: Configure ninja
+      #   run: >
+      #     docker exec -w "${wd}/ninja" "${container_name}" cmake -B build
+      #     -D CMAKE_BUILD_TYPE="Release"
+      #     -D CMAKE_CXX_STANDARD="20"
+      #     -D BUILD_TESTING=off
+      #     -D BUILD_GMOCK=off
+      #     -D INSTALL_GTEST=off
 
-      - name: Cmake Build ninja
-        run: docker exec -w "${wd}/ninja" "${container_name}" cmake --build build --parallel --config Release
+      # - name: Cmake Build ninja
+      #   run: docker exec -w "${wd}/ninja" "${container_name}" cmake --build build --parallel --config Release
 
-      - name: Host - Rename ninja to ninja-${{ matrix.binary_name }}
-        run: mv -f ${{ github.workspace }}/ninja/build/ninja ninja-${{ matrix.binary_name }}
+      # - name: Host - Rename ninja to ninja-${{ matrix.binary_name }}
+      #   run: mv -f ${{ github.workspace }}/ninja/build/ninja ninja-${{ matrix.binary_name }}
 
-      - name: Host - crossbuild binary info via file
-        run: |
-          printf '%b\n' '```bash' | tee -a "$GITHUB_STEP_SUMMARY"
-          file ./ninja-${{ matrix.binary_name }} >> $GITHUB_STEP_SUMMARY
-          printf '%b\n' '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      # - name: Host - crossbuild binary info via file
+      #   run: |
+      #     printf '%b\n' '```bash' | tee -a "$GITHUB_STEP_SUMMARY"
+      #     file ./ninja-${{ matrix.binary_name }} >> $GITHUB_STEP_SUMMARY
+      #     printf '%b\n' '```' | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - name: Host - ninja-${{ matrix.binary_name }} --version
-        run: ./ninja-${{ matrix.binary_name }} --version >> $GITHUB_STEP_SUMMARY
+      # - name: Host - ninja-${{ matrix.binary_name }} --version
+        # run: ./ninja-${{ matrix.binary_name }} --version >> $GITHUB_STEP_SUMMARY
