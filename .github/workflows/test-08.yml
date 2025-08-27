@@ -41,12 +41,10 @@ jobs:
         uses: userdocs/actions/qbt_docker@main
         with:
             os_id: ghcr.io/userdocs/qbt-musl-cross-make
-            userdocs_base: alpine
             os_version_id: ${{ matrix.arch_type }}
             custom_docker_commands: |
               -e LDFLAGS=-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id
               -e CPPFLAGS=-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3
-              -v hello:${wd}/local
 
       - name: DOCKER ENV TEST
         run: >
@@ -85,4 +83,7 @@ jobs:
           printf '%b\n' '```' | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Host - ninja-${{ matrix.binary_name }} --version
-        run: ./ninja-${{ matrix.binary_name }} --version >> $GITHUB_STEP_SUMMARY
+        run: |
+          printf '%b\n' '```bash' | tee -a "$GITHUB_STEP_SUMMARY"
+          ./ninja-${{ matrix.binary_name }} --version >> $GITHUB_STEP_SUMMARY
+          printf '%b\n' '```' | tee -a "$GITHUB_STEP_SUMMARY"
