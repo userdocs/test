@@ -3,10 +3,6 @@ name: "08"
 on:
   workflow_dispatch:
 
-concurrency:
-  group: mcm-ninja-build
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-24.04-arm # needs to be ubuntu-24.04 for qemu-user-static loongarch64 support
@@ -45,6 +41,7 @@ jobs:
         uses: userdocs/actions/qbt_docker@main
         with:
             os_id: ghcr.io/userdocs/qbt-musl-cross-make
+            userdocs_base: alpine
             os_version_id: ${{ matrix.arch_type }}
             custom_docker_commands: |
               -e LDFLAGS=-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id

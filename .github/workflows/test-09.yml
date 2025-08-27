@@ -3,10 +3,6 @@ name: "09"
 on:
   workflow_dispatch:
 
-concurrency:
-  group: mcm-ninja-build
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-24.04-arm # needs to be ubuntu-24.04 for qemu-user-static loongarch64 support
