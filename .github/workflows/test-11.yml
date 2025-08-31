@@ -1,0 +1,31 @@
+name: "11"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  boost_version:
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        libt_version:
+          - version: "2.0.11"
+            boost_minor: "89"
+          - version: "1.2.20"
+            boost_minor: "86"
+        qbt_gui: ["GUI=ON", "GUI=OFF"]
+        qt_version: ["6.10.1"]
+
+    name: "libt-${{ matrix.libt_version.version }} | boost-1.${{ matrix.libt_version.boost_minor }} | ${{ matrix.qbt_gui }}"
+
+    steps:
+      - name: Show outcome
+        run: |
+          echo "## Build Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| libt_version | ${{ matrix.libt_version.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| BOOST_MINOR_VERSION | ${{ matrix.libt_version.boost_minor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| qbt_gui | ${{ matrix.qbt_gui }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| qt_version | ${{ matrix.qt_version }} |" >> $GITHUB_STEP_SUMMARY

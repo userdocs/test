@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-1:
+  macos-13:
     runs-on: macos-13
 
     steps:
@@ -16,7 +16,7 @@ jobs:
         run: |
           brew install openssl@1.1
 
-  build-2:
+  macos-14:
     runs-on: macos-14
 
     steps:
@@ -28,7 +28,7 @@ jobs:
         run: |
           brew install openssl@1.1
 
-  build-3:
+  macos-15:
     runs-on: macos-15
 
     steps:
