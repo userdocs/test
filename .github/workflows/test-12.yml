@@ -17,7 +17,7 @@ jobs:
         qbt_gui: ["GUI=ON", "GUI=OFF"]
         qt_version: ["6.10.1"]
 
-    name: "libt-${{ matrix.libtorrent.version }} | boost-1.${{ matrix.libtorrent.boost_minor }} | ${{ matrix.qbt_gui }}"
+    name: "libt-${{ matrix.libtorrent.version }} | boost-1.${{ matrix.libtorrent.boost_minor_version }} | ${{ matrix.qbt_gui }}"
 
     steps:
       - name: Show outcome
