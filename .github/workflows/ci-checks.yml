@@ -41,7 +41,7 @@ jobs:
           persist-credentials: false
 
       - name: Run zizmor 🌈
-        uses: userdocs/zizmor-action@master # v0.4.0
+        uses: userdocs/zizmor-action@main # v0.4.0
 
   editorconfig-checker:
     runs-on: ubuntu-24.04-arm
