@@ -31,6 +31,7 @@ jobs:
   zizmor-checker:
     runs-on: ubuntu-24.04-arm
     permissions:
+      contents: read
       security-events: write
     env:
       ACTIONS_RUNNER_DEBUG: true
