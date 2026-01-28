@@ -58,5 +58,3 @@ jobs:
       - name: grep
         run: |
           grep --version
-          apk add grep
-          grep --version
