@@ -32,6 +32,16 @@ jobs:
             platform: linux/s390x
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Host - Bootstrap qemu
+        uses: userdocs/actions/qemu@e8f57bd585c7bb6dcce011694d6772bab657abca # v1.0.7
+        with:
+          target_arch: ${{ matrix.arch }}
+
       - name: Host - Bootstrap docker container
         uses: userdocs/actions/qbt_docker@e8f57bd585c7bb6dcce011694d6772bab657abca # v1.0.7
         with:
