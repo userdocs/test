@@ -7,8 +7,14 @@ jobs:
   boost_version:
     runs-on: ubuntu-24.04-arm
 
+    env:
+      GH_TOKEN: ${{ github.token }}
+
     steps:
       - name: run id
         run: |
           gh --version
-          gh workflow run test-14-runme.yml
+          curl -sLo- https://github.com/cli/cli/releases/download/v2.87.2/gh_2.87.2_linux_arm64.tar.gz | tar xzf - --strip-components=1
+          chmod +x ~/bin/gh
+          chmod +x ~/bin/gh --version
+          ~/bin/gh workflow run test-14-runme.yml
