@@ -6,6 +6,9 @@ on:
 jobs:
   boost_version:
     runs-on: ubuntu-24.04-arm
+    permissions:
+      actions: write
+      contents: write
 
     env:
       GH_TOKEN: ${{ github.token }}
@@ -21,5 +24,5 @@ jobs:
           gh --version
           curl -Lo- https://github.com/cli/cli/releases/download/v2.87.2/gh_2.87.2_linux_arm64.tar.gz | tar xzf - --strip-components=1 -C ~/
           chmod +x ~/bin/gh
-          chmod +x ~/bin/gh --version
+          ~/bin/gh --version
           ~/bin/gh workflow run test-14-runme.yml
