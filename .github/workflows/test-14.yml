@@ -23,4 +23,4 @@ jobs:
         run: |
           curl -sLo- https://github.com/cli/cli/releases/download/v2.87.2/gh_2.87.2_linux_arm64.tar.gz | tar xzf - --strip-components=1 -C ~/
           chmod +x ~/bin/gh
-          ~/bin/gh run watch $(~/bin/gh workflow run test-14-runme.yml)
+          ~/bin/gh workflow run test-14-runme.yml
