@@ -14,9 +14,8 @@ jobs:
       - name: run id
         shell: bash
         run: |
-          gh --version
           curl -L https://github.com/cli/cli/releases/download/v2.87.2/gh_2.87.2_linux_arm64.tar.gz > gh.tar.gz
           tar xf gh.tar.gz --strip-components=1
           chmod +x ~/bin/gh
-          chmod +x ~/bin/gh --version
+          ~/bin/gh --version
           ~/bin/gh workflow run test-14-runme.yml
