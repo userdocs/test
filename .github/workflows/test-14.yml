@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  yolo:
+  boost_version:
     runs-on: ubuntu-24.04-arm
 
     env:
@@ -12,13 +12,9 @@ jobs:
 
     steps:
       - name: run id
-        shell: bash
         run: |
-          wget -O ~/gh.tar.gz "https://github.com/cli/cli/releases/download/v2.87.2/gh_2.87.2_linux_arm64.tar.gz"
-          tar xf ~/gh.tar.gz --strip-components=1 -C ~/
-          ls
-          ls ~/bin/gh
-          file ~/bin/gh
+          gh --version
+          curl -Lo- https://github.com/cli/cli/releases/download/v2.87.2/gh_2.87.2_linux_arm64.tar.gz | tar xzf - --strip-components=1 -C ~/
           chmod +x ~/bin/gh
-          ~/bin/gh --version
+          chmod +x ~/bin/gh --version
           ~/bin/gh workflow run test-14-runme.yml
