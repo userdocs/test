@@ -23,5 +23,6 @@ jobs:
         run: |
           curl -sLo- https://github.com/cli/cli/releases/download/v2.87.2/gh_2.87.2_linux_arm64.tar.gz | tar xzf - --strip-components=1 -C ~/
           chmod +x ~/bin/gh
-          url=$(~/bin/gh workflow run test-14-runme.yml 2>&1)
-          gh run watch --exit-status ${url##*/}
+          #url=$(~/bin/gh workflow run test-14-runme.yml 2>&1)
+          #gh run watch --exit-status ${url##*/}
+          gh run watch --exit-status $(~/bin/gh workflow run test-14-runme.yml 2>&1 | sed -r 's|(.*)runs/(.*)|\2|')
